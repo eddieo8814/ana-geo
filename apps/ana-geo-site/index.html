@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ana-geo-site</title>
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --ok:#22c55e; --warn:#fb923c; --bad:#f87171; --gold:#facc15; }
+  * { box-sizing:border-box; margin:0; }
+  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
+  main { flex:1; display:flex; min-height:0; }
+  #panel { width:370px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
+  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:16px 0 6px; display:flex; align-items:center; gap:8px; }
+  #panel h2:first-child { margin-top:0; }
+  #panel h2 .badge { margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; }
+  #map { flex:1; }
+  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:18px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
+  #statusbar b { color:var(--text); font-weight:600; }
+  #s-summary { color:var(--accent); }
+  #converse { border-top:1px solid var(--line); background:var(--panel); }
+  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
+  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
+  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
+  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
+  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
+  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  button { padding:7px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:#0ea5e922; border-color:var(--accent); }
+  button.on { background:#22c55e22; border-color:var(--ok); }
+  select, input[type="number"], input[type="text"] { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 6px; font-size:13px; }
+  #err { color:var(--bad); padding:0 16px 6px; font-size:13px; min-height:1em; }
+  #notice { color:var(--dim); font-size:12px; margin-top:6px; }
+  input[type="file"] { display:none; }
+  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
+  .row { display:flex; gap:6px; align-items:center; }
+  .row > * { flex:1; min-width:0; }
+  .row > .fixed { flex:none; }
+  .hint { color:var(--dim); font-size:12px; margin-top:4px; }
+  .rule { border:1px solid var(--line); border-radius:8px; padding:8px; margin-bottom:8px; background:#0f172a66; }
+  .rule .line { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .rule .line:last-child { margin-bottom:0; }
+  .rule select, .rule input { flex:1; min-width:0; }
+  .rule .drop { flex:none; padding:2px 8px; }
+  .rule .tag { flex:none; color:var(--dim); font-size:12px; }
+  .caution { color:var(--warn); font-size:12px; border-left:2px solid var(--warn); padding:4px 8px; margin:6px 0; background:#fb923c14; }
+  .weightbar { display:flex; align-items:center; gap:8px; margin:6px 0; font-size:13px; }
+  .weightbar .sum { font-variant-numeric:tabular-nums; }
+  .weightbar.bad .sum { color:var(--bad); }
+  .weightbar.ok .sum { color:var(--ok); }
+  .cand { display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #33415555; cursor:pointer; }
+  .cand:hover { background:#33415533; }
+  .cand.sel { background:#38bdf822; }
+  .cand .rank { flex:none; width:30px; color:var(--dim); font-variant-numeric:tabular-nums; }
+  .cand .score { margin-left:auto; font-variant-numeric:tabular-nums; }
+  .cand.top .rank, .cand.top .score { color:var(--gold); }
+  .cand.out .score { color:var(--bad); }
+  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
+  .layer-row .dot { width:9px; height:9px; border-radius:50%; flex:none; }
+  #explain { font-size:13px; margin-top:6px; }
+  #explain .head { font-weight:600; margin-bottom:4px; }
+  #explain .line { color:var(--dim); padding:1px 0; }
+  #explain .line b { color:var(--text); }
+  .cand-tip { background:#0f172ade; border:1px solid #334155; color:#e2e8f0; font-size:11px; padding:1px 5px; }
+  .cand-tip::before { display:none; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>ana-geo-site</h1>
+    <span class="q">Which candidate is best?</span>
+  </header>
+  <main>
+    <aside id="panel">
+      <h2>Candidates <span class="badge" id="cand-count">0</span></h2>
+      <div class="row">
+        <button id="pick" class="fixed">Add by map click</button>
+        <label class="btn fixed" for="candfile">Load GeoJSON…</label>
+        <input type="file" id="candfile" accept=".json,.geojson" />
+        <button id="clear-cands" class="fixed">Clear</button>
+      </div>
+      <div class="hint">Points or polygons (FR-SITE-001). A polygon candidate is measured from its centroid.</div>
+      <div id="candidates"></div>
+
+      <h2>Reference features</h2>
+      <div class="row">
+        <select id="acq-class"></select>
+        <button id="acq-btn" class="fixed">Acquire</button>
+      </div>
+      <div class="hint">Fetches the class from Overpass inside the current map view, or load your own GeoJSON to replace it.</div>
+      <label class="btn" for="reffile" style="margin-top:8px">Load reference GeoJSON…</label>
+      <input type="file" id="reffile" accept=".json,.geojson" />
+      <div id="acq-caution"></div>
+      <div id="layers"></div>
+      <div id="notice"></div>
+
+      <h2>Hard constraints <span class="badge" id="hc-count"></span></h2>
+      <div id="constraints"></div>
+      <div id="constraint-caution"></div>
+      <button id="add-constraint">+ Constraint</button>
+
+      <h2>Soft criteria &amp; weights</h2>
+      <div id="criteria"></div>
+      <div class="weightbar" id="weightbar">
+        <span>Σ weight</span><span class="sum" id="weight-sum">–</span>
+        <button id="normalize" class="fixed">Normalize</button>
+      </div>
+      <div id="weight-err" class="hint"></div>
+      <button id="add-criterion">+ Criterion</button>
+
+      <h2>Ranking</h2>
+      <button id="run" class="primary" style="width:100%">Rank candidates</button>
+      <div id="explain"></div>
+    </aside>
+    <div id="map"></div>
+  </main>
+  <div id="statusbar">
+    <span>Center <b id="s-center">–</b></span>
+    <span>Zoom <b id="s-zoom">–</b></span>
+    <span>Candidates <b id="s-cands">–</b></span>
+    <span>Eligible <b id="s-eligible">–</b></span>
+    <span>Top <b id="s-top">–</b></span>
+    <span>Rules <b id="s-summary">–</b></span>
+  </div>
+  <section id="converse">
+    <div id="feed"></div>
+    <div id="err"></div>
+    <form id="chatform">
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Rank candidate locations using university proximity, roads, and residential separation."' autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </section>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/vendor/turf/turf.min.js"></script>
+  <script src="/geo/registry.js"></script>
+  <script src="/geo/rules.js"></script>
+  <script src="/geo/overpass.js"></script>
+  <script src="/geo/scoring.js"></script>
+  <script src="/geo/layers.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

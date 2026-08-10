@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "ana-geo-search",
+    "version": "0.1.0"
+  },
+  "stateVersion": 1,
+  "map": {
+    "view": {
+      "center": [
+        36.3504,
+        127.3845
+      ],
+      "zoom": 13
+    },
+    "observedView": null,
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "layers": [],
+  "selection": null,
+  "analysis": null,
+  "provenance": []
+}

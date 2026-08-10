@@ -1,0 +1,87 @@
+{
+  "app": {
+    "name": "ana-geo-site",
+    "version": "0.1.0"
+  },
+  "stateVersion": 1,
+  "map": {
+    "view": {
+      "center": [
+        36.3504,
+        127.3845
+      ],
+      "zoom": 13
+    },
+    "observedView": null,
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "layers": [],
+  "selection": null,
+  "analysis": {
+    "site": {
+      "candidates": {
+        "ref": "/api/results/site-candidates",
+        "version": 0,
+        "count": 0,
+        "bbox": [],
+        "list": [],
+        "indexOmitted": false
+      },
+      "constraints": [
+        {
+          "id": "residential",
+          "kind": "distance",
+          "featureClass": "residential",
+          "metric": "residentialDistance",
+          "operator": ">=",
+          "value": 1000,
+          "unit": "m",
+          "enabled": true
+        }
+      ],
+      "criteria": [
+        {
+          "id": "university",
+          "label": "University proximity",
+          "kind": "distance",
+          "featureClass": "university",
+          "metric": "universityDistance",
+          "unit": "m",
+          "best": 0,
+          "worst": 3000,
+          "weight": 0.4
+        },
+        {
+          "id": "road",
+          "label": "Road accessibility",
+          "kind": "distance",
+          "featureClass": "road",
+          "metric": "roadDistance",
+          "unit": "m",
+          "best": 0,
+          "worst": 2000,
+          "weight": 0.4
+        },
+        {
+          "id": "residential",
+          "label": "Residential separation",
+          "kind": "distance",
+          "featureClass": "residential",
+          "metric": "residentialDistance",
+          "unit": "m",
+          "best": 3000,
+          "worst": 500,
+          "weight": 0.2
+        }
+      ],
+      "weights": {
+        "sum": 1,
+        "valid": true,
+        "error": null
+      },
+      "results": null
+    }
+  },
+  "provenance": []
+}

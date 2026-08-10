@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ana-geo-map</title>
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; }
+  * { box-sizing:border-box; margin:0; }
+  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
+  main { flex:1; display:flex; min-height:0; }
+  #panel { width:260px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
+  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:12px 0 6px; }
+  #panel h2:first-child { margin-top:0; }
+  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
+  #map { flex:1; }
+  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; }
+  #statusbar b { color:var(--text); font-weight:600; }
+  #converse { border-top:1px solid var(--line); background:var(--panel); }
+  #feed { max-height:160px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
+  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
+  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
+  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
+  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
+  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  button { padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; }
+  input[type="file"] { display:none; }
+  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>ana-geo-map</h1>
+    <span class="q">Where is it? — the smallest Agent-Native GIS</span>
+  </header>
+  <main>
+    <aside id="panel">
+      <h2>Layers</h2>
+      <div id="layers"></div>
+      <h2>GeoJSON</h2>
+      <label class="btn" for="geofile">Load GeoJSON…</label>
+      <input type="file" id="geofile" accept=".json,.geojson" />
+      <h2>Markers</h2>
+      <div id="markerinfo" style="color:var(--dim);font-size:13px">Click the map to add a marker.</div>
+      <button id="clearmarkers" style="margin-top:6px;font-size:13px">Remove all markers</button>
+    </aside>
+    <div id="map"></div>
+  </main>
+  <div id="statusbar">
+    <span>Center <b id="s-center">–</b></span>
+    <span>Zoom <b id="s-zoom">–</b></span>
+    <span id="s-note"></span>
+  </div>
+  <section id="converse">
+    <div id="feed"></div>
+    <div id="err"></div>
+    <form id="chatform">
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Move the map to Daejeon."' autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </section>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

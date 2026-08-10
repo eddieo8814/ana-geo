@@ -1,0 +1,42 @@
+{
+  "app": {
+    "name": "ana-geo-satellite",
+    "version": "0.1.0"
+  },
+  "stateVersion": 1,
+  "map": {
+    "view": {
+      "center": [
+        36.3504,
+        127.3845
+      ],
+      "zoom": 10
+    },
+    "observedView": null,
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "satelliteSearch": {
+    "collection": "sentinel-2-l2a",
+    "bbox": [
+      127.2,
+      36.24,
+      127.56,
+      36.46
+    ],
+    "datetime": "2026-06-01/2026-08-11",
+    "maxCloudCover": 20,
+    "limit": 50,
+    "aoiSource": "viewport",
+    "requestId": 0
+  },
+  "scenes": [],
+  "layers": [],
+  "selection": {
+    "activeSceneId": null,
+    "thumbnailVisible": true
+  },
+  "analysis": {
+    "lastSearch": null
+  }
+}

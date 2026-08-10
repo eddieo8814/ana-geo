@@ -1,0 +1,40 @@
+{
+  "app": {
+    "name": "ana-geo-explorer",
+    "version": "0.1.0"
+  },
+  "stateVersion": 10,
+  "map": {
+    "view": {
+      "center": [
+        36.3504,
+        127.3845
+      ],
+      "zoom": 15
+    },
+    "observedView": {
+      "center": [
+        36.34939933791253,
+        127.3822206258774
+      ],
+      "zoom": 18
+    },
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "search": {
+    "categories": [
+      "cafe",
+      "hospital",
+      "university"
+    ],
+    "requestId": 0,
+    "lastRunAt": null,
+    "lastBbox": [],
+    "truncated": false,
+    "note": null
+  },
+  "layers": [],
+  "selection": null,
+  "analysis": null
+}

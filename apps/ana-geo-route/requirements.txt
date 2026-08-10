@@ -1,0 +1,12 @@
+# ana-geo-route — Python worker dependencies (PRD §19.3, §30 item 13).
+# Install into a local venv so the app stays self-contained (PRD §9):
+#
+#   python3 -m venv .venv
+#   .venv/bin/pip install -r requirements.txt
+#
+# Requires Python >= 3.10 (osmnx 2.x drops 3.9).
+# server.js prefers .venv/bin/python when it exists, else falls back to python3.
+
+osmnx>=2.0
+networkx>=3.0
+geopandas>=1.0

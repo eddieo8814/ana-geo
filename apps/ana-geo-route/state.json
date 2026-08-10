@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ana-geo-route",
+    "version": "0.1.0"
+  },
+  "stateVersion": 1,
+  "map": {
+    "view": {
+      "center": [36.3504, 127.3845],
+      "zoom": 14
+    },
+    "observedView": null,
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "layers": [],
+  "selection": null,
+  "analysis": {
+    "mode": "drive",
+    "optimize": "time",
+    "origin": null,
+    "destination": null,
+    "areaCapKm2": 100,
+    "paddingKm": 2,
+    "isochroneMinutes": [5, 10, 20],
+    "candidateCategory": "hospital",
+    "candidateRadiusKm": 2.5,
+    "route": null,
+    "ranking": null,
+    "isochrone": null,
+    "network": null,
+    "lastError": null
+  },
+  "provenance": []
+}

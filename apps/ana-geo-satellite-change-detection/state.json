@@ -1,0 +1,47 @@
+{
+  "app": {
+    "name": "ana-geo-satellite-change-detection",
+    "version": "0.1.0"
+  },
+  "stateVersion": 1,
+  "map": {
+    "view": {
+      "center": [
+        36.3504,
+        127.3845
+      ],
+      "zoom": 12
+    },
+    "observedView": null,
+    "baseLayer": "osm"
+  },
+  "markers": [],
+  "sceneSearch": {
+    "collection": "sentinel-2-l2a",
+    "bbox": [],
+    "datetime": "2026-02-01/2026-08-10",
+    "maxCloudCover": 20,
+    "limit": 40,
+    "requestId": 0,
+    "lastRunAt": null,
+    "resultCount": 0,
+    "note": null
+  },
+  "scenes": {
+    "before": null,
+    "after": null
+  },
+  "detection": {
+    "method": "ndvi-difference",
+    "threshold": 0.2,
+    "direction": "both",
+    "minRegionSqM": 10000,
+    "regionLimit": null,
+    "requestId": 0,
+    "lastRunAt": null,
+    "note": null
+  },
+  "layers": [],
+  "selection": null,
+  "analysis": null
+}

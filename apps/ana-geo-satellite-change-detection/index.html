@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ana-geo-satellite-change-detection</title>
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; }
+  * { box-sizing:border-box; margin:0; }
+  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
+  main { flex:1; display:flex; min-height:0; }
+  #panel { width:330px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
+  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
+  #panel h2:first-child { margin-top:0; }
+  .field { display:flex; align-items:center; gap:8px; padding:2px 0; }
+  .field label { width:96px; color:var(--dim); flex:none; font-size:13px; }
+  .field input, .field select { flex:1; min-width:0; padding:5px 7px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
+  .field input[type=range] { padding:0; }
+  button { padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font:inherit; }
+  button:hover { border-color:var(--accent); }
+  button[disabled] { opacity:.55; cursor:progress; }
+  .wide { width:100%; margin-top:8px; }
+  #searchbtn { background:#0ea5e91f; border-color:#0ea5e955; }
+  #runbtn { background:#22c55e1f; border-color:#22c55e55; }
+  /* A search can return 40 scenes; the list scrolls inside itself so the
+     analysis controls and the result stay on screen with it. */
+  #scenes { max-height:200px; overflow:auto; }
+  .scene { border:1px solid var(--line); border-radius:8px; padding:6px 8px; margin-bottom:6px; font-size:13px; cursor:pointer; }
+  .scene:hover { border-color:var(--accent); }
+  .scene.before { border-color:#a78bfa; background:#a78bfa14; }
+  .scene.after { border-color:#38bdf8; background:#38bdf814; }
+  .scene.disabled { opacity:.45; }
+  .scene .sid { font-weight:600; word-break:break-all; }
+  .scene .meta { color:var(--dim); display:flex; gap:10px; flex-wrap:wrap; }
+  .scene .pick { display:flex; gap:6px; margin-top:4px; }
+  .scene .pick button { padding:2px 8px; font-size:12px; border-radius:6px; }
+  /* Before and after sit side by side: the pair is one decision, and the
+     vertical space belongs to the scene list and the result. */
+  #slots { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+  .slot { border:1px solid var(--line); border-radius:8px; padding:5px 7px; font-size:12px; min-width:0; }
+  .slot .sid { font-size:12px; overflow-wrap:anywhere; }
+  .slot .role { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+  .slot.filled.before { border-color:#a78bfa; } .slot.filled.after { border-color:#38bdf8; }
+  table.kv { border-collapse:collapse; width:100%; font-size:13px; }
+  table.kv td { padding:1px 0; vertical-align:top; word-break:break-word; }
+  table.kv td:first-child { color:var(--dim); padding-right:8px; white-space:nowrap; width:96px; }
+  #explain { margin:6px 0; padding:6px 8px; border-left:3px solid var(--accent); background:#38bdf814; font-size:13px; }
+  .region-row { display:flex; align-items:center; gap:8px; padding:2px 0; font-size:13px; cursor:pointer; }
+  .region-row:hover { color:var(--accent); }
+  .region-row .rank { color:var(--dim); width:22px; font-variant-numeric:tabular-nums; }
+  .region-row .dot { width:9px; height:9px; border-radius:50%; flex:none; }
+  .region-row .area { margin-left:auto; font-variant-numeric:tabular-nums; }
+  .layer-row { display:flex; align-items:center; gap:8px; padding:3px 0; }
+  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; }
+  #map { flex:1; }
+  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
+  #statusbar b { color:var(--text); font-weight:600; }
+  #converse { border-top:1px solid var(--line); background:var(--panel); }
+  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
+  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
+  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
+  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
+  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
+  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; white-space:pre-wrap; }
+  #err.warn { color:#fbbf24; }
+  .hint { color:var(--dim); font-size:12px; }
+  .leaflet-popup-content { font:13px/1.45 system-ui,sans-serif; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>ana-geo-satellite-change-detection</h1>
+    <span class="q">What changed over time? — Sentinel-2 NDVI difference over the ANA runtime</span>
+  </header>
+  <main>
+    <aside id="panel">
+      <h2>Scene search (STAC)</h2>
+      <div class="field"><label for="f-from">From</label><input id="f-from" type="date" /></div>
+      <div class="field"><label for="f-to">To</label><input id="f-to" type="date" /></div>
+      <div class="field"><label for="f-cloud">Max cloud %</label><input id="f-cloud" type="number" min="0" max="100" step="5" /></div>
+      <button id="searchbtn" class="wide">Search scenes in view</button>
+      <div class="hint" id="search-note"></div>
+
+      <h2>Before / after pair</h2>
+      <div id="slots"></div>
+      <div id="scenes"></div>
+
+      <h2>Analysis</h2>
+      <div class="field">
+        <label for="f-threshold">Threshold</label>
+        <input id="f-threshold" type="range" /><b id="f-threshold-val">0.20</b>
+      </div>
+      <div class="field"><label for="f-direction">Change</label><select id="f-direction"></select></div>
+      <div class="field"><label for="f-minarea">Min region</label><input id="f-minarea" type="number" min="0" step="1000" /><span class="hint">m²</span></div>
+      <div class="field"><label for="f-limit">Show top</label><input id="f-limit" type="number" min="1" step="1" placeholder="all" /></div>
+      <button id="runbtn" class="wide">Run change detection</button>
+
+      <h2>Result</h2>
+      <div id="explain">No analysis yet.</div>
+      <table class="kv" id="summary"></table>
+      <div id="regions"></div>
+
+      <h2>Layers</h2>
+      <div id="layers"></div>
+    </aside>
+    <div id="map"></div>
+  </main>
+  <div id="statusbar">
+    <span>Center <b id="s-center">–</b></span>
+    <span>Zoom <b id="s-zoom">–</b></span>
+    <span>Threshold <b id="s-threshold">–</b></span>
+    <span>Changed area <b id="s-area">–</b></span>
+    <span id="s-note"></span>
+  </div>
+  <section id="converse">
+    <div id="feed"></div>
+    <div id="err"></div>
+    <form id="chatform">
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Compare this image with the one from six months ago."' autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </section>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/geo/stac.js"></script>
+  <script src="/geo/change.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

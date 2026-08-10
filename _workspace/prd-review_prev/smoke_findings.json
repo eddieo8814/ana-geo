@@ -1,0 +1,123 @@
+[
+  {
+    "id": "STR-001",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§22 (vs §9)",
+    "quote": "| Capability | Map | Explorer | Search | Site | Route | Satellite | Change Detection |",
+    "issue": "§22 capability matrix에 범례(legend)가 없어 ✓의 의미가 정의되지 않았다. ✓가 '해당 앱이 그 capability를 자체 구현한다'는 뜻인지, '진행 단계상 개념적으로 누적된다'는 뜻인지 불명확하다. §9는 \"must not require importing code from a preceding app\"이라 못박았으므로 두 해석의 구현 결과가 완전히 달라지며, 아래 STR-002~006의 매트릭스-FR 불일치가 모두 이 미정의에서 파생된다.",
+    "recommendation": "§22 표 위에 범례 1문장을 추가: \"✓ = 해당 앱이 자체 코드로 구현해야 하는 capability (§9에 따라 선행 앱에서 import하지 않는다). 공백 = 해당 앱의 요구 범위 밖.\" 추가로 각 ✓ 셀에 뒷받침 FR ID를 병기하거나(예: ✓(FR-EXP-002)), 표 하단에 capability↔FR 매핑 목록을 붙여 매트릭스를 검증 가능한 형태로 만든다.",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-002",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§22 vs §18.3/§18.6",
+    "quote": "| OSM |  | ✓ | ✓ | ✓ | ✓ |  |  |\n| Overpass |  | ✓ | ✓ | ✓ |  |  |  |\n| POI discovery |  | ✓ | ✓ | ✓ | ✓ |  |  |",
+    "issue": "§22는 Site 열에 OSM·Overpass·POI discovery를 ✓로 표시하지만, §18.3의 FR-SITE-001~010 어디에도 외부 데이터 취득 요구가 없다. 오히려 §18.6은 \"These are not mandatory for the first implementation.\"이라고 외부 데이터를 선택 사항으로 규정하여 매트릭스와 정면으로 어긋난다. 구현자는 Site 앱이 Overpass 연동을 필수로 포함해야 하는지 판단할 수 없다.",
+    "recommendation": "둘 중 하나로 통일한다. (A) Site가 실제로 후보/참조 피처를 OSM에서 가져온다면 §18.3에 \"FR-SITE-011 — Reference Data Acquisition: The app shall retrieve reference features (e.g., roads, residential areas) from OSM via Overpass API.\"를 추가하고 §18.6의 optional 목록에서 OSM을 분리해 명시한다. (B) 아니라면 §22 Site 열의 OSM/Overpass/POI discovery ✓를 제거하고, 후보와 참조 피처는 사용자가 GeoJSON으로 주입한다고 §18.1에 명시한다.",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-003",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§22 vs §19.4",
+    "quote": "| POI discovery |  | ✓ | ✓ | ✓ | ✓ |  |  |",
+    "issue": "§22 POI discovery 행이 Route 열에 ✓이지만 §19.4의 FR-ROUTE-001~009에는 POI 탐색 요구가 없다. FR-ROUTE-008(\"Rank candidate destinations by network distance or travel time\")은 candidate destinations가 어디서 오는지 정의하지 않으며, §19.6의 \"Which hospital can I reach fastest?\" 예시는 병원 POI 탐색이 선행되어야 성립한다. §9(앱 간 코드 import 금지) 때문에 Explorer의 구현을 재사용한다고 가정할 수도 없다.",
+    "recommendation": "§19.4에 POI 취득 FR을 신설한다: \"FR-ROUTE-010 — Destination Candidate Discovery: The app shall obtain candidate destinations either from user/ANA-provided GeoJSON or from an OSM category query (Overpass) within the current viewport.\" 동시에 §22 Route 열의 Overpass 셀이 공백인 점도 이 FR과 함께 재검토한다(FR-ROUTE-008/010의 데이터 출처와 일치시킬 것).",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-004",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§22 vs §17.2/§17.3",
+    "quote": "| OSM |  | ✓ | ✓ | ✓ | ✓ |  |  |\n| Overpass |  | ✓ | ✓ | ✓ |  |  |  |",
+    "issue": "§22는 Search 열에 OSM·Overpass·POI discovery를 ✓로 표시하지만, §17에는 External Data 하위 섹션이 없고 §17.2는 추가 라이브러리로 Turf.js만 선언한다. FR-SEARCH-001~008은 모두 \"features\"가 이미 존재한다는 전제의 연산 요구여서, 피처 취득 경로가 문서 어디에도 요구로 남아 있지 않다. Explorer에는 있는 §16.2 External Data에 대응하는 섹션이 Search에는 없다.",
+    "recommendation": "§17에 §16.2와 동형의 하위 섹션 \"17.x External Data — OpenStreetMap / Overpass API (Explorer와 동일, 앱 내 자체 구현)\"을 추가하고, 대상/참조 피처를 카테고리 질의로 취득하는 FR(예: FR-SEARCH-009 — Feature Set Acquisition)을 명시한다. Search가 외부 데이터를 취득하지 않는 설계라면 §22 Search 열의 OSM/Overpass/POI discovery ✓를 제거한다.",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-005",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§22 vs §21.5",
+    "quote": "| STAC |  |  |  |  |  | ✓ | ✓ |\n| Sentinel-2 |  |  |  |  |  | ✓ | ✓ |",
+    "issue": "§22는 Change Detection 열에 STAC·Sentinel-2를 ✓로 표시하지만, §21.5의 FR-CD-001/002는 \"Select scene A\" / \"Select scene B\"뿐이며 장면을 어떻게 검색·취득하는지에 대한 FR이 없다. §20의 FR-SAT-001~009(STAC 검색)를 재사용하려면 §9의 독립성 요구를 위반하게 되므로, CD 앱은 자체 STAC 검색 요구를 가져야 한다.",
+    "recommendation": "§21.5에 \"FR-CD-000 — Scene Discovery: The app shall search a STAC catalog (Sentinel-2 L2A) by AOI, date range, and cloud cover to populate the selectable scene list (§20.3의 FR-SAT-001/003/005/006에 대응하는 자체 구현).\"을 추가하거나, §21.1에 \"scene 식별자는 외부에서 주입된다\"는 전제를 명시하고 §22 CD 열의 STAC/Sentinel-2 ✓를 조정한다.",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-006",
+    "dimension": "structure",
+    "severity": "minor",
+    "section": "§22 vs §18.3",
+    "quote": "| Buffer |  |  | ✓ | ✓ |  |  |  |",
+    "issue": "§22 Buffer 행이 Site 열에 ✓이지만 §18.3의 FR-SITE-001~010에는 buffer 연산을 요구하는 항목이 없다(buffer는 §17.3 FR-SEARCH-002에만 정의). Site의 하드 제약(§18.2 \"Distance from residential area >= 1 km\")은 거리 계산만으로도 구현 가능하므로 구현자는 추측으로 넘어갈 수 있으나, 매트릭스가 문서 내 다른 근거와 어긋난 상태로 남는다.",
+    "recommendation": "FR-SITE-002 또는 FR-SITE-006에 \"제약/지표 계산은 §17.3 FR-SEARCH-002와 동일한 buffer 연산을 사용할 수 있다\"는 문장을 추가하거나, Site가 순수 거리 계산만 쓴다면 §22 Site 열의 Buffer ✓를 제거한다.",
+    "confidence": "medium",
+    "resolved": false
+  },
+  {
+    "id": "STR-007",
+    "dimension": "structure",
+    "severity": "info",
+    "section": "§22",
+    "quote": "| Temporal analysis |  |  |  |  |  |  | ✓ |",
+    "issue": "§22 매트릭스의 행 집합이 FR에 존재하는 주요 capability를 일부 누락하여 완비성 점검표로 쓸 수 없다. 예: Python worker(§19.2/§19.3/§21.3, §26.2), AOI 폴리곤 드로잉(FR-SAT-002), 점수 해설/breakdown(FR-SITE-010)에 대응하는 행이 없다.",
+    "recommendation": "§22에 최소 다음 행을 추가한다: \"Python worker\"(Route ✓, Change Detection ✓), \"Geometry drawing\"(Satellite ✓, 필요 시 Search/Site), \"Result explanation\"(Site ✓, Change Detection ✓). 행 추가 시 각 ✓에 대응 FR을 함께 표기하면 STR-001의 범례 개선과 일관된다.",
+    "confidence": "medium",
+    "resolved": false
+  },
+  {
+    "id": "STR-008",
+    "dimension": "structure",
+    "severity": "major",
+    "section": "§14 vs §17.2/§19.3/§21.3 (및 §18, §20 부재)",
+    "quote": "Dependencies should be introduced gradually.",
+    "issue": "앱별 의존성 선언이 7개 앱 중 3개(§17.2 Turf.js, §19.3 osmnx/networkx/geopandas, §21.3 rasterio/numpy)에만 존재한다. §18 Site는 §22상 Spatial distance·Buffer·Multi-condition query가 ✓인데 Turf.js에 해당하는 의존성 선언이 없고, §20 Satellite는 STAC 검색(FR-SAT-006)이 필수인데 STAC 클라이언트/HTTP 계층 의존성 선언이 없다. §9가 선행 앱 코드 재사용을 금지하므로 각 앱은 자기 의존성을 스스로 선언해야 한다.",
+    "recommendation": "§18과 §20에 §17.2와 동형의 하위 섹션을 추가한다 — \"18.x Additional Library: Turf.js (거리/버퍼 계산)\", \"20.x Dependencies: 브라우저 fetch 기반 STAC 클라이언트(추가 런타임 의존성 없음) 또는 명시된 STAC JS 라이브러리\". §15/§16도 동일하게 최소 선언(Leaflet, Leaflet+fetch)을 두어 7개 앱 템플릿을 균일화한다.",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-009",
+    "dimension": "structure",
+    "severity": "minor",
+    "section": "§14 vs §4.1(9)",
+    "quote": "Introduce only when necessary:",
+    "issue": "§14는 의존성을 \"gradually\" 도입한다고 선언하고 §4.1(9)는 \"Introduce Python GIS processing only when browser-side GIS is no longer sufficient\"를 목표로 두지만, §14 자체에는 각 라이브러리가 '어느 앱에서 처음 도입되는지'가 없다. 도입 시점 정보가 §17.2/§19.3/§21.3에만 흩어져 있어 §14만 읽는 구현자는 gradual 도입 규칙을 검증할 수 없다.",
+    "recommendation": "§14를 표로 바꾼다: | Dependency | Layer | First introduced in | 근거 섹션 | 예: Leaflet/browser/ana-geo-map/§10.1, Turf.js/browser/ana-geo-search/§17.2, osmnx·networkx·geopandas/python/ana-geo-route/§19.3, rasterio·numpy/python/ana-geo-satellite-change-detection/§21.3, opencv-python·scikit-image·torch/optional/미도입(§21.3 optional later).",
+    "confidence": "high",
+    "resolved": false
+  },
+  {
+    "id": "STR-010",
+    "dimension": "structure",
+    "severity": "minor",
+    "section": "§21.3 vs §14/§21.5",
+    "quote": "Initial:\n\n```text\nrasterio\nnumpy\n```",
+    "issue": "§21.3의 초기 의존성은 rasterio와 numpy뿐인데, FR-CD-009(\"Convert significant changed regions to vector polygons\")와 FR-CD-008/§21.6의 `changedAreaSqKm`·`areaSqKm`는 벡터 폴리곤 생성과 면적 계산을 요구한다. §14의 Python 목록에는 GeoPandas가 있으나 §21.3에는 반영되지 않아, 문서 내 두 의존성 목록이 같은 앱에 대해 다른 범위를 시사한다.",
+    "recommendation": "§21.3 Initial 목록에 벡터 처리 의존성을 명시한다(예: shapely 또는 geopandas — rasterio.features.shapes 출력의 폴리곤화·면적 계산용). 또는 rasterio+numpy만으로 처리한다면 §21.5 FR-CD-009에 \"polygonization uses rasterio.features.shapes; area is computed in the scene CRS without an external vector library\"를 명시한다. 좌표계별 면적 계산 정확도는 GIS 실현성 축의 확인이 필요하다.",
+    "confidence": "medium",
+    "resolved": false
+  },
+  {
+    "id": "STR-011",
+    "dimension": "structure",
+    "severity": "info",
+    "section": "§14 vs §19.3/§21.3",
+    "quote": "Optional advanced dependencies:\n\n- OpenCV\n- scikit-image\n- PyTorch",
+    "issue": "§14는 표시 이름(GeoPandas, NetworkX, OSMnx, OpenCV, PyTorch)을 쓰고 §19.3/§21.3은 설치 패키지 이름(geopandas, networkx, osmnx, opencv-python, torch)을 쓴다. 내용상 모순은 아니지만 requirements 파일을 만들 때 대조가 필요해 문서 정확성을 약간 해친다.",
+    "recommendation": "§14의 목록을 설치 패키지 이름으로 통일하고 필요 시 괄호로 통칭을 병기한다: `geopandas`, `networkx`, `osmnx`, `rasterio`, `numpy`, `opencv-python` (OpenCV), `scikit-image`, `torch` (PyTorch).",
+    "confidence": "high",
+    "resolved": false
+  }
+]

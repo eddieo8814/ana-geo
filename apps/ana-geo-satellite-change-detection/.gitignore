@@ -1,0 +1,10 @@
+# Python virtualenv — recreate with the README's two commands (~118 MB installed).
+.venv/
+__pycache__/
+*.pyc
+
+# Runtime artifacts: result bodies behind resultRef, relay inbox, provenance log.
+data/results/*.geojson
+data/inbox.log
+data/provenance.log
+*.tmp

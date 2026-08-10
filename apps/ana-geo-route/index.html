@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ana-geo-route</title>
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --warn:#f87171; }
+  * { box-sizing:border-box; margin:0; }
+  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
+  header .worker { margin-left:auto; color:var(--dim); font-size:12px; }
+  main { flex:1; display:flex; min-height:0; }
+  #panel { width:310px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
+  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
+  #panel h2:first-child { margin-top:0; }
+  .row { display:flex; align-items:center; gap:8px; padding:3px 0; }
+  .row label { color:var(--dim); font-size:13px; min-width:74px; }
+  .row .val { margin-left:auto; font-variant-numeric:tabular-nums; }
+  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
+  #map { flex:1; }
+  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; }
+  #statusbar b { color:var(--text); font-weight:600; }
+  #converse { border-top:1px solid var(--line); background:var(--panel); }
+  #feed { max-height:140px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
+  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
+  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
+  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
+  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
+  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  button, select, input[type="text"], input[type="number"] {
+    padding:6px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text);
+    font:inherit; font-size:13px; cursor:pointer;
+  }
+  select, input { cursor:auto; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  button.active { border-color:var(--accent); color:var(--accent); }
+  button.wide { width:100%; margin-top:6px; }
+  #err { color:var(--warn); padding:0 16px 6px; font-size:13px; min-height:1em; }
+  .card { border:1px solid var(--line); border-radius:8px; padding:8px; margin-top:6px; font-size:13px; background:#0f172a80; }
+  .card.error { border-color:#f8717166; background:#f871711a; }
+  .card .code { color:var(--warn); font-weight:600; font-size:12px; letter-spacing:.03em; }
+  .card .hint { color:var(--dim); font-size:12px; margin-top:4px; }
+  .note { color:var(--dim); font-size:12px; margin-top:4px; }
+  ol.ranking { margin:6px 0 0 18px; padding:0; font-size:13px; }
+  ol.ranking li { padding:2px 0; }
+  ol.ranking .cost { color:var(--dim); }
+  .swatch { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; }
+  .busy { color:var(--accent); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>ana-geo-route</h1>
+    <span class="q">How are places connected?</span>
+    <span class="worker" id="workerinfo">worker: checking…</span>
+  </header>
+  <main>
+    <aside id="panel">
+      <h2>Route</h2>
+      <div class="row">
+        <label>Map click</label>
+        <button id="pick-origin" class="active">Origin</button>
+        <button id="pick-dest">Destination</button>
+      </div>
+      <div class="row"><label>Origin</label><span class="val" id="v-origin">–</span></div>
+      <div class="row"><label>Destination</label><span class="val" id="v-dest">–</span></div>
+      <div class="row">
+        <label>Mode</label>
+        <select id="mode">
+          <option value="drive">Driving</option>
+          <option value="walk">Walking</option>
+          <option value="bike">Cycling</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Optimize</label>
+        <select id="optimize">
+          <option value="time">Fastest (time)</option>
+          <option value="distance">Shortest (distance)</option>
+        </select>
+      </div>
+      <button id="go-route" class="wide">Find route</button>
+      <button id="clear-points" class="wide">Clear origin & destination</button>
+      <div id="route-summary"></div>
+
+      <h2>Nearest destination</h2>
+      <div class="row">
+        <label>Category</label>
+        <select id="category"></select>
+      </div>
+      <div class="row">
+        <label>Radius km</label>
+        <input type="number" id="radius" min="0.2" max="10" step="0.5" style="width:80px" />
+        <span class="val" id="v-candidates">0 loaded</span>
+      </div>
+      <button id="go-candidates" class="wide">Fetch candidates from OSM</button>
+      <button id="go-nearest" class="wide">Rank by network cost</button>
+      <div id="ranking"></div>
+
+      <h2>Isochrone</h2>
+      <div class="row">
+        <label>Minutes</label>
+        <input type="text" id="minutes" style="width:110px" />
+      </div>
+      <button id="go-isochrone" class="wide">Show reachable area</button>
+      <div id="isochrone-summary"></div>
+
+      <h2>Network</h2>
+      <div id="network"></div>
+
+      <h2>Layers</h2>
+      <div id="layers"></div>
+
+      <h2>Analysis bounds</h2>
+      <div class="row">
+        <label>Area cap km²</label>
+        <input type="number" id="areacap" min="1" step="10" style="width:90px" />
+      </div>
+      <div class="note">Requests whose padded bbox exceeds the cap are refused with the numbers, never truncated (FR-ROUTE-010).</div>
+
+      <div id="lasterror"></div>
+    </aside>
+    <div id="map"></div>
+  </main>
+  <div id="statusbar">
+    <span>Center <b id="s-center">–</b></span>
+    <span>Zoom <b id="s-zoom">–</b></span>
+    <span>Route <b id="s-route">–</b></span>
+    <span id="s-busy"></span>
+  </div>
+  <section id="converse">
+    <div id="feed"></div>
+    <div id="err"></div>
+    <form id="chatform">
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Which hospital can I reach fastest?"' autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </section>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/geo/registry.js"></script>
+  <script src="/geo/overpass.js"></script>
+  <script src="/geo/styles.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

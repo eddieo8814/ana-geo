@@ -1,0 +1,1610 @@
+{
+  "round": 2,
+  "date": "2026-08-11",
+  "target": "PRD.md v1.1 (working tree)",
+  "baseline": "라운드 1 대상 git hash 7b9ac9e에서 수정됨 — v1.1은 1,980행으로 v1.0 대비 +124행",
+  "verdict": "CONDITIONAL PASS",
+  "verdict_rule": "critical 0, major >= 1 -> CONDITIONAL PASS",
+  "prev_round_file": "_workspace/prd-review_prev/04_merged_findings.json",
+  "inputs": [
+    {
+      "file": "01_structure_findings.json",
+      "axis": "structure",
+      "scope": "full",
+      "tracked": 43,
+      "resolved": 11,
+      "carried": 27,
+      "new": 5
+    },
+    {
+      "file": "02_ana_findings.json",
+      "axis": "ana-alignment",
+      "scope": "full",
+      "tracked": 13,
+      "resolved": 5,
+      "carried": 6,
+      "new": 2
+    },
+    {
+      "file": "03_gis_findings.json",
+      "axis": "gis-feasibility",
+      "scope": "full",
+      "tracked": 33,
+      "resolved": 8,
+      "carried": 21,
+      "new": 4
+    }
+  ],
+  "delta_vs_round1": {
+    "round1_merged_active": 67,
+    "resolved_entries": 18,
+    "carried_entries": 49,
+    "new_entries": 9,
+    "round2_merged_active": 58
+  },
+  "totals": {
+    "round1": {
+      "count": 67,
+      "critical": 4,
+      "major": 38,
+      "minor": 18,
+      "info": 7
+    },
+    "round2": {
+      "count": 58,
+      "critical": 0,
+      "major": 31,
+      "minor": 21,
+      "info": 6
+    }
+  },
+  "resolved_findings": [
+    {
+      "id": "MRG-001",
+      "sources": [
+        "ANA-001"
+      ],
+      "round1_severity": "critical",
+      "section": "§12",
+      "summary": "상태 변경 전파 계약(단조 증가 version + 폴링)이 없고 app.version은 동기화 카운터가 아니다"
+    },
+    {
+      "id": "MRG-002",
+      "sources": [
+        "ANA-002"
+      ],
+      "round1_severity": "critical",
+      "section": "§8.1",
+      "summary": "Converse Surface 배선 요구(채널·브리지 API·응답 경로)가 전무하고 server.js 역할이 정의되지 않았다"
+    },
+    {
+      "id": "MRG-003",
+      "sources": [
+        "ANA-003"
+      ],
+      "round1_severity": "critical",
+      "section": "§30",
+      "summary": "7개 앱 수용 기준 어디에도 '앱 코드/기능 자체를 바꾼다'가 없어 Agent as Runtime 원칙이 검증되지 않는다"
+    },
+    {
+      "id": "MRG-004",
+      "sources": [
+        "STR-012",
+        "GIS-001"
+      ],
+      "round1_severity": "critical",
+      "section": "§20.3, §20.6",
+      "summary": "Satellite 앱에 위성 영상 자체를 표시하는 FR이 없어 §20.1 core question과 §35 성공 기준을 충족할 수 없다"
+    },
+    {
+      "id": "MRG-005",
+      "sources": [
+        "STR-001"
+      ],
+      "round1_severity": "major",
+      "section": "§22",
+      "summary": "capability matrix에 범례가 없어 ✓의 의미(자체 구현 vs 개념적 누적)가 미정의"
+    },
+    {
+      "id": "MRG-013",
+      "sources": [
+        "GIS-006"
+      ],
+      "round1_severity": "major",
+      "section": "§19.2",
+      "summary": "Python worker가 다이어그램으로만 존재하고 호출 방식·수명주기·에러 전파 계약이 없어 앱 5와 앱 7이 다른 구조로 갈라진다"
+    },
+    {
+      "id": "MRG-015",
+      "sources": [
+        "GIS-023"
+      ],
+      "round1_severity": "major",
+      "section": "§27, §8.1",
+      "summary": "외부 API를 브라우저에서 직접 호출하는지 server.js 프록시를 경유하는지 미정이라 §27의 프록시·allowlist 요구가 적용 지점을 잃는다"
+    },
+    {
+      "id": "MRG-018",
+      "sources": [
+        "STR-014"
+      ],
+      "round1_severity": "major",
+      "section": "§12 vs FR-MAP-006",
+      "summary": "FR-MAP-006은 마커를 state.json에 저장하라 하지만 §12 상태 예시에 markers 슬롯이 없다"
+    },
+    {
+      "id": "MRG-019",
+      "sources": [
+        "STR-015",
+        "GIS-028"
+      ],
+      "round1_severity": "major",
+      "section": "§12",
+      "summary": "layers 배열에 요소 스키마가 없어 (1) 레이어 토글 FR과 §24.1 조회 계약이 뒷받침되지 않고 (2) 결과 피처를 통짜로 담는 독해에서 state가 MB급이 되어 폴링 동기화와 에이전트 편집이 함께 무너진다"
+    },
+    {
+      "id": "MRG-022",
+      "sources": [
+        "ANA-006"
+      ],
+      "round1_severity": "major",
+      "section": "§24.1 vs §15.2",
+      "summary": "뷰포트·선택 피처·레이어 가시성을 서버에 영속화하라는 FR이 없어 ANA가 '지금 화면'을 읽을 수 없다"
+    },
+    {
+      "id": "MRG-027",
+      "sources": [
+        "STR-022"
+      ],
+      "round1_severity": "major",
+      "section": "§30, §31 vs §15~§21",
+      "summary": "FR과 수용 기준이 PRD와 앱별 SPEC.md에 이중으로 존재하는데 어느 쪽이 정본인지 규칙이 없다"
+    },
+    {
+      "id": "MRG-028",
+      "sources": [
+        "STR-019"
+      ],
+      "round1_severity": "major",
+      "section": "§15.4/§16.6/§17.7/§18.7/§19.7/§20.6/§21.8",
+      "summary": "수용 기준이 FR ID를 한 번도 참조하지 않아 20개 이상의 FR이 어떤 기준으로도 검증되지 않고, 7개 앱의 'ANA can …' 항목은 대응 FR이 없어 pass/fail 판정 자체가 불가능하다"
+    },
+    {
+      "id": "MRG-029",
+      "sources": [
+        "STR-020"
+      ],
+      "round1_severity": "major",
+      "section": "§19.7 vs FR-ROUTE-009",
+      "summary": "Route 수용 기준이 isochrone 1종만 요구해 3종(5·10·20분)을 요구하는 FR-ROUTE-009를 약화시킨다"
+    },
+    {
+      "id": "MRG-030",
+      "sources": [
+        "STR-021",
+        "GIS-008"
+      ],
+      "round1_severity": "major",
+      "section": "§19.4, §26",
+      "summary": "도로망 적재는 수용 기준·매트릭스가 요구하지만 대응 FR이 없고, 다운로드 범위 상한과 route 앱 성능 목표도 없다"
+    },
+    {
+      "id": "MRG-037",
+      "sources": [
+        "STR-037",
+        "GIS-002"
+      ],
+      "round1_severity": "major",
+      "section": "§20.2",
+      "summary": "'one stable STAC provider'를 이름으로 고정하지 않아 인증이 필요한 공급자를 고를 수 있고 키 불요 요구와 충돌한다"
+    },
+    {
+      "id": "MRG-052",
+      "sources": [
+        "STR-035"
+      ],
+      "round1_severity": "minor",
+      "section": "전 구간",
+      "summary": "FR ID가 정의 위치 밖에서 한 번도 인용되지 않아 모든 상호 참조가 산문 재서술이다"
+    },
+    {
+      "id": "MRG-054",
+      "sources": [
+        "ANA-010"
+      ],
+      "round1_severity": "minor",
+      "section": "§31",
+      "summary": "SPEC.md 템플릿에 상태 동기화·승인 흐름 항목이 없어 MRG-001/025의 공백이 7개 앱 사양으로 복제된다"
+    },
+    {
+      "id": "MRG-059",
+      "sources": [
+        "GIS-022"
+      ],
+      "round1_severity": "minor",
+      "section": "§19",
+      "summary": "도로 그래프 캐싱 요구가 없어 경로를 재계산할 때마다 Overpass 다운로드가 반복된다"
+    }
+  ],
+  "findings": [
+    {
+      "id": "MRG-006",
+      "sources": [
+        "STR-002"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§22 vs §18.3/§18.6",
+      "summary": "매트릭스는 Site에 OSM·Overpass·POI discovery를 요구하지만 §18에 대응 FR이 없고 §18.6은 선택으로 규정한다",
+      "confidence": "high",
+      "related": [
+        "MRG-005",
+        "MRG-050"
+      ],
+      "resolved": false,
+      "round2_note": "§22 범례 신설로 성격이 강해졌다 — 라운드 1에서는 '✓의 뜻이 모호하다'였으나 이제 '규칙이 있고 그것을 어긴다'다."
+    },
+    {
+      "id": "MRG-007",
+      "sources": [
+        "STR-003",
+        "GIS-016"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§22 vs §19.4",
+      "summary": "Route 열의 외부 데이터 표기가 양방향으로 어긋난다 — POI discovery ✓에 대응 FR이 없고, 실제 존재하는 Overpass 의존성은 칸이 비어 rate limit 요구가 상속되지 않는다",
+      "confidence": "high",
+      "related": [
+        "MRG-005",
+        "MRG-030",
+        "MRG-035"
+      ],
+      "resolved": false,
+      "round2_note": "§22 범례 신설로 위반이 명시적이 됐다. 추가로 GIS-016이 minor→major로 승격됐다 — 범례가 'Blank = out of scope'를 새로 명시해 Route 열 Overpass 공백이 표기 누락에서 적극적 선언으로 바뀌었고, 신설 FR-ROUTE-010이 OSM 도로망 적재를 요구하는데 OSMnx는 Overpass를 질의하므로 구현자가 멈춘다."
+    },
+    {
+      "id": "MRG-008",
+      "sources": [
+        "STR-004"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§22 vs §17.2/§17.3",
+      "summary": "매트릭스는 Search에 OSM·Overpass ✓이지만 §17에 External Data 절도 피처 취득 FR도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-005"
+      ],
+      "resolved": false,
+      "round2_note": "§22 범례 신설로 성격이 강해졌다(해석 차이 → 명시적 규칙 위반)."
+    },
+    {
+      "id": "MRG-009",
+      "sources": [
+        "STR-005",
+        "GIS-012"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§21.5 vs §22 / §9",
+      "summary": "Change Detection은 §9 독립성 요구상 자체 STAC 검색이 필요한데 §21.5는 'Select scene A/B'만 있고 씬 획득 FR이 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-005",
+        "MRG-037",
+        "MRG-039"
+      ],
+      "resolved": false,
+      "round2_note": "§22 범례 신설로 위반이 명시적이 됐다 — CD 열의 STAC ✓·Sentinel-2 ✓를 뒷받침하는 FR이 §21.5에 없다. MRG-068(Imagery preview CD ✓)과 같은 절을 고치게 되므로 함께 처리할 것."
+    },
+    {
+      "id": "MRG-010",
+      "sources": [
+        "STR-008"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§14 vs §15/§16/§18/§20, §31",
+      "summary": "7개 앱 중 4개(map·explorer·site·satellite)에 의존성 선언 하위 섹션이 없어 §31 SPEC 템플릿 7항을 충족할 수 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-011",
+        "MRG-012",
+        "MRG-042",
+        "MRG-061"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-011",
+      "sources": [
+        "ANA-007"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§14, §3.3",
+      "summary": "'의존성 0' 원칙의 적용 경계가 정의되지 않아 ANA 런타임 코어에도 npm 의존성·번들러가 들어올 수 있다",
+      "confidence": "high",
+      "related": [
+        "MRG-004",
+        "MRG-010",
+        "MRG-012",
+        "MRG-013",
+        "MRG-014",
+        "MRG-015"
+      ],
+      "resolved": false,
+      "round2_note": "필요성 증가 — 무변경이나 §8.4(프록시)·§8.5(워커 spawn) 신설로 server.js 부담이 커져 경계 규칙의 필요성이 v1.0보다 높아졌다.",
+      "round1_note": "리더가 지목한 ANA-007↔GIS-005/006 대조 결과: 병합하지 않는다. ANA-007은 '경계 규칙의 부재'(어디까지 완화 가능한가), GIS-005는 '누락된 변환 계층'(Overpass→GeoJSON), GIS-006은 '워커 실행 계약의 부재'로 각각 다른 문제다. GIS 축이 이 이관을 실증으로 마무리했다 — 표준 모듈만 쓰는 server.js PoC(Node 24.13.1, 65행, npm 의존성 0)로 정적 서빙·state.json 원자적 교체·allowlist 프록시·Python 워커 spawn 4개를 모두 통과시켰다. 실현 가능하므로 문안을 완화하지 않고 세 단서로 강화한다: (1) Node >= 20 LTS 명시(전역 fetch가 없으면 undici 같은 npm 의존성이 되돌아온다 — MRG-014와 같은 수정 지점), (2) hand-rolled 서버의 안전 요구 명시(헤더 전송 후 예외 처리, 내부 경로·스택 비노출, 경로 이탈 검사 — PoC 초판이 404 하나에 크래시하고 절대 경로를 노출했다. '의존성 0은 비용 제거가 아니라 비용의 이동'), (3) vendored 범위 정의(Turf.js는 단일 UMD 번들이면 되지만 Leaflet은 leaflet.css가 images/marker-icon.png를 상대 경로로 참조해 dist 통째 벤더링이 필요하다). 세 번째 단서가 MRG-004의 해법을 썸네일 경로로 결정한다."
+    },
+    {
+      "id": "MRG-012",
+      "sources": [
+        "GIS-005"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§14, §16.2",
+      "summary": "Overpass 응답은 OSM JSON인데 GeoJSON 정규화(§11.1) 사이의 변환 계층이 의존성 전략에도 요구에도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-011",
+        "MRG-021"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-014",
+      "sources": [
+        "GIS-007",
+        "STR-043"
+      ],
+      "dimensions": [
+        "gis-feasibility",
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§30",
+      "summary": "§8.4·§8.5를 공통 계약으로 못박고 §30 항목 12로 이행을 완료 조건에 넣었으나, §30 필수 파일 목록에 그 계약을 설치·재현할 명세가 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-011",
+        "MRG-013",
+        "MRG-047"
+      ],
+      "resolved": false,
+      "round2_note": "[조율 종결 — 병합] 구조 축 STR-043이 라운드 2에 신규 발행됐다가 GIS 축 지적을 받아 프레이밍을 정정하면서 이 항목과 같은 결함이 됐다. 철회된 각도: '§8.5의 keeps §9 independence intact가 거짓이다' — §9의 조작적 정의(289·305·307행)가 판정 기준을 앱 간 의존성으로만 잡고 런타임 종류를 넣지 않으므로, spawn 워커는 다른 앱 디렉터리에 의존하지 않아 그 단언은 §9 자신의 정의 아래에서 참이다. 리포터의 잠정 판단(인접 배치)도 이 잘못된 전제 위에 있었으므로 함께 철회했다. 확정된 지적은 §30 고정이며 근거 셋이 모두 반박 불가다 — (1) §8.5가 python3 tools/<op>.py를 계약으로 못박아 route·CD는 Python이 하드 전제인데 pip install -r로 재현 가능한 매니페스트가 필수 목록에 없다, (2) §8.4를 npm 의존성 없이 구현하려면 전역 fetch가 필요해 Node 최소 버전이 사실상 전제가 됐는데 명시가 없다(v1.1에서 새로 생긴 전제), (3) §32 항목 6의 README dependencies는 산문이지 설치가 재현되는 매니페스트가 아니다. STR-043의 관찰 중 살릴 부분: §8.5가 프로세스 수명 관리와 런타임 가용성을 구분하지 않아 독자가 '독립성 문제는 §8.5가 처리했다'고 오독할 수 있다 — 거짓 단언이 아니라 오해 유발이므로 단독 finding이 아니라 수정 문안의 단서 한 줄로 처리한다.",
+      "round1_note": "구조 축 조언 반영 — 지적은 §9의 예시(두 번째 예시가 하필 ana-geo-satellite인 점)가 아니라 정의 문장 쪽에 두어야 한다. §20에는 Python 의존성 선언이 아예 없어 App 6은 브라우저 전용으로 읽히므로 예시 자체는 모순이 아니다. 문제는 §9가 독립 실행을 `node server.js`로 정의하는데 App 5·7이 그 정의를 만족할 수 없다는 것이다. 또 ANA-007 실증에서 파생된 요구가 추가됐다 — Node 최소 버전(>= 20 LTS)을 §30에 명시해야 한다. 외부 API 프록시를 npm 의존성 없이 구현하려면 전역 fetch가 필요하고 이는 Node 18 이상에서만 제공된다(안정화는 21).",
+      "recommendation_note": "§30 파일 목록에 조건부 필수 항목 추가 — 'and, for apps that use Python (route, change detection): requirements.txt with pinned versions'. DoD에 항목 신설 — 'the README states the required Node.js version (>= 20 LTS, for the global fetch used by §8.4) and, where applicable, the required Python version'. §32 항목 6을 'dependencies (prose summary; the authoritative list is the manifest required by §30)'로 구체화해 산문과 매니페스트의 역할을 가른다. §8.5 말미에 단서 한 줄 — 'This addresses process lifecycle only; the Python runtime itself remains a prerequisite declared per §30.'"
+    },
+    {
+      "id": "MRG-016",
+      "sources": [
+        "GIS-014"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§12",
+      "summary": "state 안에 [lat, lon]과 GeoJSON [lon, lat]이 규약 선언 없이 공존해 ANA의 직접 편집 시 좌표 뒤바뀜이 조용히 발생한다",
+      "confidence": "high",
+      "related": [
+        "MRG-001",
+        "MRG-019",
+        "MRG-021"
+      ],
+      "resolved": false,
+      "round2_note": "표면 증가 — v1.1의 layer 요소 스키마에 \"bbox\": []가 추가돼 Leaflet [lat,lon]과 GeoJSON [lon,lat]이 섞이는 지점이 하나 더 생겼다.",
+      "round1_note": "ANA 정합성 축 판정 흡수(중복 finding 미발행): major 유지 지지. 근거로 §12의 자기 기준 문장을 인용에 추가할 것 — 'State must be simple enough for a coding agent to inspect and modify.' 원칙 2에서 state를 편집하는 주체가 ANA이므로, 한 파일 안에 두 규약이 선언 없이 공존하면 문서가 자기 기준을 스스로 위반한다. §24.2 증분 수정에서 특히 위험하다. ANA 축은 `{\"lat\":…,\"lon\":…}` 객체 형태 권고에 동의했다 — 순서를 틀릴 수 없는 표현이 '에이전트가 고치기 쉬운 상태'의 정의에 부합한다."
+    },
+    {
+      "id": "MRG-017",
+      "sources": [
+        "STR-013"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§10.1",
+      "summary": "§10.1의 정규 문장이 'the baseline application'으로 한정되어 앱 2~7의 지도 기본 기능 요구가 어디에도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-005",
+        "MRG-028"
+      ],
+      "resolved": false,
+      "round2_note": "성격이 강해졌다 — 원문(§10.1 'The baseline application shall support:', 327행)은 무변경이나, v1.1이 신설한 §22 범례가 Leaflet map·Marker·GeoJSON 행의 ✓도 각 앱 섹션 FR로 뒷받침되기를 요구하므로 이 공백이 범례 위반 3행을 추가로 낳는다. [조율 종결] GIS-030이 구조 축에 넘긴 '매트릭스 전반 점검'이 이 항목에 흡수됐다 — 구조 축이 STR-013의 issue에 근거를 반영했으므로 별도 finding을 만들지 않는다."
+    },
+    {
+      "id": "MRG-020",
+      "sources": [
+        "STR-016"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§12 vs §17.4/§18.4/§19.5/§20.4/§21.6",
+      "summary": "§12는 analysis 슬롯을 두지만 앱별 모델 5종이 세 가지 다른 배치 관례로 제시되어 저장 위치가 미정의다",
+      "confidence": "high",
+      "related": [
+        "MRG-001",
+        "MRG-021"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-021",
+      "sources": [
+        "STR-017"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§11.1 vs §18.4/§21.6",
+      "summary": "공통 feature property 모델과 앱별 결과 모델의 관계가 정의되지 않아 점수·면적의 저장 위치가 구현자마다 갈린다",
+      "confidence": "high",
+      "related": [
+        "MRG-016",
+        "MRG-020",
+        "MRG-058"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-023",
+      "sources": [
+        "ANA-009"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "minor",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§10.2 vs §3.1",
+      "summary": "레이아웃 그림에서 Converse Surface가 앱 프레임 바깥에 놓여 '시각 상태와 대화의 한 화면 공존' 요구가 성립하지 않는다",
+      "confidence": "medium",
+      "related": [
+        "MRG-002"
+      ],
+      "resolved": false,
+      "severity_change": "major -> minor",
+      "round2_note": "major→minor 강등 — §8.3의 'a message typed into the dashboard'가 대화 입력 위치를 확정해 최악의 실패 모드(별도 터미널)는 닫혔다. 남은 것은 §10.2 그림이 여전히 프레임 밖이고 동시 가시성 문구가 없다는 점."
+    },
+    {
+      "id": "MRG-024",
+      "sources": [
+        "ANA-008"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "minor",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§1.1 vs §8/§10.2",
+      "summary": "ANA 베이스 빌딩블록 스킬(uxui-design-system, fakechat-dashboard-agent 등)의 채택 여부가 문서 어디에도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-002"
+      ],
+      "resolved": false,
+      "severity_change": "major -> minor",
+      "round2_note": "major→minor 강등 — §8.3이 채널 계열 미채택을 선언해 하중 지점이 해소됐다. 남은 것은 uxui-design-system·agent-native-app-harness 미언급이며 구현자가 합리적으로 추측 가능하다."
+    },
+    {
+      "id": "MRG-025",
+      "sources": [
+        "ANA-004"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§24.3",
+      "summary": "제안→승인→적용 패턴이 'where available'로 약화되어 필수 계약이 아니고 DoD·수용 기준 어디에도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-003",
+        "MRG-054"
+      ],
+      "resolved": false,
+      "round2_note": "성격 변화 — §24.3 원문은 무변경이나 §8.3·§30-11이 제안→승인을 필수화했다. 이를 정의하는 절만 'where available'로 남아, 코드 변경 이외(상태 스키마 변경 등)에서 승인 생략이 정당화된다."
+    },
+    {
+      "id": "MRG-026",
+      "sources": [
+        "STR-023"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§28 vs §24.4/§30(5)/§11.1",
+      "summary": "provenance 기록이 §24.4에서는 요구, §28에서는 'should optionally'로 서로 다르게 규정된다",
+      "confidence": "high",
+      "related": [
+        "MRG-015",
+        "MRG-059"
+      ],
+      "resolved": false,
+      "round2_note": "모순 확대 — §8.4가 프록시를 provenance 기록 지점으로 규정하면서 기록을 필수로 전제하는 절이 §24.4·§11.1·§30에 더해 넷이 됐는데 §28만 'should optionally'로 남았다."
+    },
+    {
+      "id": "MRG-031",
+      "sources": [
+        "STR-034",
+        "GIS-009"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§19.4 FR-ROUTE-005",
+      "summary": "시간 최소 경로가 'where edge data supports it' 조건부인데 요약·결과 계약·수용 기준은 travel time을 무조건 요구한다",
+      "confidence": "high",
+      "related": [
+        "MRG-051",
+        "MRG-056"
+      ],
+      "resolved": false,
+      "round2_note": "악화 — §19.7이 'where edge data supports it'를 그대로 옮겨 적어, 판정 불가 조건절이 요구뿐 아니라 합격 판정 문장에도 들어갔다."
+    },
+    {
+      "id": "MRG-032",
+      "sources": [
+        "STR-024"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "major",
+      "status": "partially_resolved",
+      "cross_confirmed": true,
+      "section": "§15.3, §19.6, §20.5",
+      "summary": "대응 FR이 없는 ANA 예시가 여러 앱에 있으나 §21.7과 달리 evolution 요청으로 표시되지 않아 v1 필수 범위가 갈린다",
+      "confidence": "high",
+      "related": [
+        "MRG-003",
+        "MRG-025"
+      ],
+      "resolved": false,
+      "resolved_sources": [
+        "GIS-024"
+      ],
+      "severity_change": "major -> minor",
+      "round2_note": "부분 해소 + 강등(major→minor) — §20.5가 마지막 두 예시를 evolution request로 명시하고 §19.6의 'Avoid this road.'가 §19.7 진화 기준으로 분류되면서 세 사례 중 둘이 해소됐다(GIS-024 해소). 잔존은 §15.3의 'Remove all markers.' 하나이며 관례 자체는 자리잡았다.",
+      "round1_note": "GIS 축 판단: 'Avoid this road'는 NetworkX 엣지 제거로 구현 난이도가 낮아 FR 신설도 가능하나, §24.3 진화 시연 사례로 옮기는 편이 제품 서사에 부합한다(GIS-024 권고 (b)). **선후 조건(구조·ANA 축 합의):** '예시를 evolution으로 분류'하는 선택지를 택하면 MRG-040이 지적한 공백(진화 요청에 대응하는 수용 기준 없음)이 네 앱으로 번지므로, 두 조치를 반드시 함께 적용해야 한다. 분류만 하고 끝내면 검증되지 않는 진화 예시가 늘어날 뿐이다. [추가] 분류 시 무게를 구분할 것 — 'Avoid this road.'는 NetworkX 엣지 제거로 끝나는 저비용 기능이고 'Add Sentinel-1 support.'는 SAR 특성상 컬렉션·밴드 구성이 달라 진짜 진화 요청이다. 구조 축이 두 사례를 한 묶음으로 열거했으나 이 차이 자체가 'v1 필수 vs 진화 시연' 구분의 필요성을 뒷받침한다(GIS 축 지적)."
+    },
+    {
+      "id": "MRG-033",
+      "sources": [
+        "STR-025"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§18.3 FR-SITE-005",
+      "summary": "가중치 검증 FR이 합계 위반 시 동작(거부/경고/자동 정규화)을 정하지 않아 §18.5의 ANA 예시가 두 갈래로 갈린다",
+      "confidence": "high",
+      "related": [
+        "MRG-021"
+      ],
+      "resolved": false,
+      "round2_note": "방향이 뒤집힌 불일치 — §18.7이 'validated to sum to 1.0'으로 좁혔는데 인용된 FR-SITE-005는 여전히 '1.0 or 100%'를 허용한다. 수용 기준이 FR보다 좁아졌다."
+    },
+    {
+      "id": "MRG-034",
+      "sources": [
+        "GIS-013"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§17.3 FR-SEARCH-001",
+      "summary": "Turf.js에는 폴리곤–폴리곤/폴리곤–라인 거리 함수가 없는데 'distance between spatial objects'와 site 지표가 그것을 전제한다",
+      "confidence": "high",
+      "related": [
+        "MRG-021",
+        "MRG-064"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-035",
+      "sources": [
+        "GIS-003"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§16.3, §16.4",
+      "summary": "10개 카테고리 동시 레이어를 요구하면서 Overpass 요청 병합·스로틀 요구가 없어 공용 인스턴스 rate limit(동시 슬롯 약 2개, HTTP 429)에 즉시 걸린다",
+      "confidence": "high",
+      "related": [
+        "MRG-007",
+        "MRG-015",
+        "MRG-036",
+        "MRG-049"
+      ],
+      "resolved": false,
+      "round1_note": "GIS 축 실측(2026-08-10): 한 측정 세션에서 실패 형태 3가지가 모두 나타났다 — (1) HTTP 200 + content-type: application/json인데 본문은 'The server is probably too busy' XHTML, (2) HTTP 504 + XHTML, (3) 미러에서 HTTP 502 + 평문. 순진한 클라이언트의 if(res.ok)는 (1)을 통과시키고 이어지는 res.json()이 SyntaxError로 터져 사용자에게는 rate limit이 아니라 정체불명의 파싱 오류로 보인다. 따라서 §25에 '상태 코드만으로 성공을 판정하지 않는다'를 요구로 명시해야 한다. 사전 점검용 /api/status가 남은 슬롯 수를 평문으로 알려 준다."
+    },
+    {
+      "id": "MRG-036",
+      "sources": [
+        "STR-026",
+        "GIS-004"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§26.1",
+      "summary": "500–2,000 feature 캡이 권고로만 존재하고 이를 강제하는 FR도, 질의 범위(zoom/bbox) 하한도, 초과 시 동작 정의도, DoD 연결도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-030",
+        "MRG-035",
+        "MRG-066"
+      ],
+      "resolved": false,
+      "round2_note": "무변경. STR-026은 minor로 유지되고 GIS-004는 major다 — 병합 severity는 major."
+    },
+    {
+      "id": "MRG-038",
+      "sources": [
+        "GIS-010"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.5 FR-CD-003",
+      "summary": "두 씬 정렬 요구에 V1 단순화 규칙(같은 MGRS 타일·CRS 강제)이 없어 최악의 경우 재투영 결정이 줄줄이 따라온다",
+      "confidence": "high",
+      "related": [
+        "MRG-039",
+        "MRG-058"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-039",
+      "sources": [
+        "GIS-011"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21, §26.2",
+      "summary": "COG 윈도우 부분 읽기 요구가 없어 AOI가 작아도 전체 장면(밴드당 수백 MB)을 내려받는 구현이 정상 통과한다",
+      "confidence": "high",
+      "related": [
+        "MRG-037",
+        "MRG-038"
+      ],
+      "resolved": false,
+      "round2_note": "긴장 증가 — §8.4의 'asset downloads' 프록시 강제와 맞물린다. 신규 MRG-076과 한 쌍이며 둘 중 하나만 고치면 성능 요구가 조용히 무력화된다."
+    },
+    {
+      "id": "MRG-040",
+      "sources": [
+        "ANA-005"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.8",
+      "summary": "§21.7이 하이라이트로 제시한 파이프라인 진화(NDVI→건물 탐지)에 대응하는 수용 기준이 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-003",
+        "MRG-065"
+      ],
+      "resolved": false,
+      "round2_note": "부분 수정이 새 충돌을 낳았다 — 진화 수용 기준은 추가됐으나 'as illustrated in §21.7'로 건물 탐지 도식을 지목해 같은 앱 §21.4('must not require deep learning')와 정면 충돌한다. 라운드 1 권고에서 피하라고 한 형태다. §20.5가 같은 문제를 올바르게 처리한 내부 모범 사례이므로 그 문안을 §21.7에 복제하면 된다.",
+      "round1_note": "ANA 축이 GIS-026(MRG-065)의 판단을 이미 반영해, 수용 기준의 예시를 건물 탐지가 아니라 동일 데이터로 실행 가능한 지수 교체(NDBI/NDWI 차분 등)로 삼도록 권고했다. 축 간 조율이 완료된 건이다."
+    },
+    {
+      "id": "MRG-041",
+      "sources": [
+        "STR-006"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§22 vs §18.3",
+      "summary": "매트릭스 Buffer 행이 Site에 ✓이지만 §18.3에 buffer 연산 FR이 없다",
+      "confidence": "medium",
+      "related": [
+        "MRG-005",
+        "MRG-034"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-042",
+      "sources": [
+        "STR-009"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§14 vs §4.1(9)",
+      "summary": "§14에 각 의존성의 최초 도입 앱이 없어 gradual 도입 규칙을 검증할 수 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-010",
+        "MRG-061"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-043",
+      "sources": [
+        "STR-010"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.3",
+      "summary": "§21.3 초기 의존성(rasterio·numpy)에 FR-CD-009 폴리곤화·면적 계산을 위한 벡터 라이브러리가 없다",
+      "confidence": "medium",
+      "related": [
+        "MRG-058"
+      ],
+      "resolved": false,
+      "round1_note": "[확정 해소] GIS 축이 rasterio 1.5.0 + numpy로 UTM 52N·10m·1000×1000 래스터에 FR-CD-006~011 전 구간을 실행해 확인했다 — rasterio.features.shapes가 폴리곤 3개를 정확히 분리했고 면적은 변화 픽셀 수 × 100㎡로 4.7200km²가 나와 기대값과 소수 넷째 자리까지 일치했다. 따라서 §21.3에 의존성을 추가하지 않고 FR-CD-009/008 문안에 방법을 명시하는 쪽(구조 축 선택지 B)으로 확정한다. 필수 문장: 'EPSG:4326 변환은 지도 표시 전용이며 면적 계산에 사용하지 않는다' — 없으면 위경도에서 ㎡를 재는 구현이 나오고 이는 예외 없이 조용히 틀린다(MRG-058)."
+    },
+    {
+      "id": "MRG-044",
+      "sources": [
+        "STR-018"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§19.5 vs FR-ROUTE-003",
+      "summary": "결과 계약의 mode 값 'drive'가 FR-ROUTE-003의 열거값(driving/walking/cycling)과 다르다",
+      "confidence": "high",
+      "related": [
+        "MRG-052"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-045",
+      "sources": [
+        "STR-027"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§27",
+      "summary": "보안 요구에서 must와 should가 혼재하고 3항의 'where practical'이 2항의 프록시 제한을 사실상 되돌린다",
+      "confidence": "high",
+      "related": [
+        "MRG-015"
+      ],
+      "resolved": false,
+      "round2_note": "모순 확대 — §8.4가 허용 목록을 무조건 요구하는데 §27.3은 여전히 'where practical'이다. 두 절이 다른 강도를 말한다.",
+      "round1_note": "MRG-015(호출 경로 미정)와 같은 절을 다루지만 문제가 다르다 — 이쪽은 조동사·수식어의 검증 불가성. 두 건을 함께 고치면 §27이 처음으로 판정 가능해진다."
+    },
+    {
+      "id": "MRG-046",
+      "sources": [
+        "STR-028"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§25",
+      "summary": "'All apps must'가 앱별로 존재할 수 없는 에러 범주(Python worker·STAC·raster)까지 일괄 요구한다",
+      "confidence": "high",
+      "related": [
+        "MRG-013",
+        "MRG-035",
+        "MRG-036"
+      ],
+      "resolved": false,
+      "round1_note": "MRG-035/036이 새 에러 범주(rate limit, result too large, query timeout) 추가를 요구하므로 §25 표 재작성 시 함께 반영해야 한다."
+    },
+    {
+      "id": "MRG-047",
+      "sources": [
+        "STR-029"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§8.1 vs §30",
+      "summary": "§8.1이 서로 다른 두 파일 목록을 제시하고 둘 다 §30의 필수 목록과 어긋난다",
+      "confidence": "high",
+      "related": [
+        "MRG-014"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-048",
+      "sources": [
+        "STR-030"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§1.1 vs §29",
+      "summary": "진행 다이어그램의 분기 이후 화살표가 어느 노드에서 이어지는지 모호하다",
+      "confidence": "high",
+      "related": [],
+      "resolved": false
+    },
+    {
+      "id": "MRG-049",
+      "sources": [
+        "GIS-029"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "partially_resolved",
+      "cross_confirmed": true,
+      "section": "§16.3",
+      "summary": "POI 프리셋 10종에 FR ID가 없고 OSM 태그 매핑도 정의되지 않아, 구현자가 고른 태그에 따라 레이어가 비어 보이면서도 수용 기준은 통과하며 앱 간 카테고리 어휘도 어긋난다",
+      "confidence": "high",
+      "related": [
+        "MRG-021",
+        "MRG-028",
+        "MRG-035"
+      ],
+      "resolved": false,
+      "resolved_sources": [
+        "STR-032"
+      ],
+      "round2_note": "부분 해소 — FR-EXP-008 신설로 레지스트리 요구는 반영됐고 STR-032는 해소됐다. 잔존(GIS-029): (1) 태그 값이 PRD에 고정되지 않아 bus station→amenity=bus_station(대전 7건) 함정이 그대로, (2) §17.4의 subway_station이 §16.3에 없어 신설 FR-EXP-008을 스스로 위반한다.",
+      "round1_note": "STR-032가 GIS 축에 넘긴 이관 질문에 GIS-029가 실측으로 답했다(대전광역시 전역, 2026-08-10): amenity=bus_station 7건 vs highway=bus_stop 2,554건(365배), amenity=charging_station 10건(참고: amenity=cafe 216건). 즉 §33이 기본 데모 지역으로 지정한 도시에서 두 프리셋이 거의 빈 레이어가 된다. GIS 축이 추가로 발견한 것: §17.4 조건 모델과 §17.6이 참조하는 subway_station이 §16.3 프리셋 목록에 없어 앱 간 어휘가 이미 어긋나 있다. 따라서 수정은 §16.3에 태그 열을 붙이는 데 그치지 않고 §11 공통 데이터 모델 쪽에 공유 카테고리 레지스트리를 두는 방향이어야 한다."
+    },
+    {
+      "id": "MRG-050",
+      "sources": [
+        "STR-033",
+        "GIS-015"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§18.2",
+      "summary": "하드 제약·소프트 기준 예시(slope, solar irradiance)가 §18.6에서 선택으로 미룬 DEM·NASA POWER를 전제한다",
+      "confidence": "high",
+      "related": [
+        "MRG-006"
+      ],
+      "resolved": false,
+      "round1_note": "[라운드 1 마감 후 정정] 구조 축 원안은 경사도·일사량·면적 셋을 함께 optional로 옮기라 했으나 면적은 잘못된 분류였다. 면적 >= 10,000㎡는 OSM 폴리곤 + turf.area(구면 계산, ㎡ 반환)로 v1 계산 가능하므로 하드 제약 예시로 남긴다. 경사도(DEM 필요)와 일사량(NASA POWER 필요)만 §18.6 optional로 분리. NASA POWER는 무키라 확장 시 §27.7을 위반하지 않는다. severity: 리더 요청으로 재검토했으나 양 축 모두 minor로 일치해 조정하지 않았다 — 예시의 분류 오류이며 구현자가 §18.6을 읽으면 스스로 알아챌 수 있다."
+    },
+    {
+      "id": "MRG-051",
+      "sources": [
+        "STR-034",
+        "GIS-019"
+      ],
+      "dimensions": [
+        "structure",
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": true,
+      "section": "§21.5 FR-CD-004",
+      "summary": "'Calculate NDVI where bands are available'의 조건절이 검증 불가하고, 실제 문제인 에셋 키 이름(red/nir vs B04/B08)이 고정되지 않았다",
+      "confidence": "high",
+      "related": [
+        "MRG-031",
+        "MRG-037",
+        "MRG-057"
+      ],
+      "resolved": false,
+      "round1_note": "GIS 축 확인: Sentinel-2 L2A에는 B04/B08이 항상 존재하므로 조건절 자체가 성립하지 않는다. 조건을 지우고 eo:bands common name으로 에셋을 해석하도록 고치는 것이 정답."
+    },
+    {
+      "id": "MRG-053",
+      "sources": [
+        "STR-036"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§17.3",
+      "summary": "7개 앱 중 Search 앱만 필수 기능 절의 제목이 다르다(Required Spatial Operations)",
+      "confidence": "high",
+      "related": [
+        "MRG-027"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-055",
+      "sources": [
+        "GIS-017"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§13, §10.1",
+      "summary": "기본 베이스맵 타일의 ODbL 출처 표기와 OSM Tile Usage Policy 준수 요구가 어디에도 없다",
+      "confidence": "high",
+      "related": [
+        "MRG-026"
+      ],
+      "resolved": false,
+      "round1_note": "severity는 GIS 축 판정(minor)을 유지했다. 로컬 데모 범위에서는 문서 공백이지만, 오픈데이터 레퍼런스 구현으로 공개될 경우 라이선스 준수 항목이므로 수정 우선순위를 minor 상위로 두는 것을 권한다."
+    },
+    {
+      "id": "MRG-056",
+      "sources": [
+        "GIS-018"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§19.4 FR-ROUTE-009",
+      "summary": "isochrone의 면 생성 방법(convex hull/alpha shape/buffer union)과 적용 travel mode가 미정이라 결과 면적이 크게 달라진다",
+      "confidence": "high",
+      "related": [
+        "MRG-029",
+        "MRG-031"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-057",
+      "sources": [
+        "GIS-020"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.4, §21.5",
+      "summary": "Sentinel-2 processing baseline 04.00의 BOA 가산 오프셋을 다루지 않아 baseline이 다른 두 시점의 NDVI 차분에 허위 변화가 섞인다",
+      "confidence": "high",
+      "related": [
+        "MRG-037",
+        "MRG-051"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-058",
+      "sources": [
+        "GIS-021"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "minor",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.5, §21.6 FR-CD-008",
+      "summary": "변화 면적을 어느 좌표계에서 계산하는지 정하지 않아 위경도 좌표에서 면적을 재는 오구현이 가능하다",
+      "confidence": "high",
+      "related": [
+        "MRG-043",
+        "MRG-038",
+        "MRG-016"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-060",
+      "sources": [
+        "STR-007"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§22",
+      "summary": "매트릭스 행 집합이 Python worker·AOI 드로잉·결과 해설 등 실재 capability를 누락해 완비성 점검표로 쓸 수 없다",
+      "confidence": "medium",
+      "related": [
+        "MRG-005"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-061",
+      "sources": [
+        "STR-011"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§14",
+      "summary": "§14는 표시 이름(GeoPandas, PyTorch), 앱 섹션은 설치 패키지 이름(geopandas, torch)을 써서 대조가 필요하다",
+      "confidence": "high",
+      "related": [
+        "MRG-042"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-062",
+      "sources": [
+        "STR-031"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§34 vs §7",
+      "summary": "재사용 대상으로 제시된 capability 계층 스택에 Explorer의 discovery 계층이 빠져 6계층만 있다",
+      "confidence": "high",
+      "related": [],
+      "resolved": false
+    },
+    {
+      "id": "MRG-063",
+      "sources": [
+        "ANA-011"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§33 vs §2",
+      "summary": "권장 데모 시나리오가 기능 사용만 보여주고 대화로 기능을 추가하는 Use=Build 순간을 포함하지 않는다",
+      "confidence": "high",
+      "related": [
+        "MRG-003"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-064",
+      "sources": [
+        "GIS-025"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§17.3 FR-SEARCH-002",
+      "summary": "Turf.js buffer는 평면 근사라 대반경·고위도에서 오차가 있으나 대전 도시 스케일에서는 무시 가능 — 한계 문서화 권장",
+      "confidence": "high",
+      "related": [
+        "MRG-034"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "MRG-065",
+      "sources": [
+        "GIS-026"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§21.7 vs §14",
+      "summary": "NDVI→건물 탐지 진화 서사는 서브미터 영상과 사전학습 가중치를 요구해 §3.3 무키·오픈 원칙과 긴장한다",
+      "confidence": "high",
+      "related": [
+        "MRG-040"
+      ],
+      "resolved": false,
+      "severity_change": "info -> minor",
+      "round2_note": "info→minor 승격 — §21.8이 'as illustrated in §21.7'로 바뀌면서 10m 해상도로 불가능한 건물 탐지가 §30 item 11('usable in the running app')과 묶여 통과할 수 없는 수용 기준이 됐다. MRG-040과 한 쌍이다.",
+      "round1_note": "ANA 축이 이 지적을 받아 ANA-005(MRG-040) 권고안을 수정했다. confidence medium→high(GIS 축 갱신). 대안 지수의 구체적 선택은 미확정 영역이다 — NDBI는 B11(SWIR, 20m)을 쓰므로 10m 밴드와 맞추려면 리샘플링이 필요하고 '식생 손실만' 부호 필터가 더 단순하다. 구현 착수 시 정하면 되는 설계 결정이다."
+    },
+    {
+      "id": "MRG-067",
+      "sources": [
+        "STR-038"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": "major",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§16.3",
+      "summary": "카테고리 어휘의 정본이 없어 §17.4 조건 모델 예시가 문서 내 유일한 카테고리 목록을 이미 위반한다",
+      "confidence": "high",
+      "related": [
+        "MRG-049",
+        "MRG-021",
+        "MRG-027"
+      ],
+      "resolved": false,
+      "round1_note": "구조 축이 라운드 1 후반에 추가 발행. GIS-029와 병합하지 말 것(구조 축 명시 요청) — 어휘 정본 부재는 문서 내부 문제로 구조 축 소관이고 개별 태그 매핑의 실측 타당성은 GIS 축 소관이다. 두 건은 §16.3을 공유 카테고리 레지스트리로 승격하는 같은 수정으로 함께 해소되며, 레지스트리의 태그 값은 GIS-029의 실측을 따른다. 레지스트리를 §11에 두면 §31 SPEC 템플릿의 '## 10. Data Model'이 7개 앱에서 같은 정본을 가리키게 된다.",
+      "round2_note": "부분 대응에 그쳐 잔존한다. FR-EXP-008이 신설되어 'a single canonical category registry'를 요구하지만(656행) 이 FR이 Explorer 앱의 요구여서 레지스트리 관할이 §16에 갇힌다. §9가 앱 간 코드 import를 금지하므로 Search·Site·Route는 이를 쓸 수 없고, §17.4는 여전히 §16.3의 10종 프리셋에 없는 subway_station을 참조해(775행) FR-EXP-008 자신의 선언('All category references — in queries, state, and examples — use registry keys')을 즉시 위반한다. 어휘 정본을 §11 공통 데이터 모델로 올려야 해소된다. MRG-049와 인접 배치 유지."
+    },
+    {
+      "id": "MRG-066",
+      "sources": [
+        "GIS-027"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "info",
+      "round1_severity": "info",
+      "status": "carried",
+      "cross_confirmed": false,
+      "section": "§13, §26.1",
+      "summary": "검증 결과 문제가 아닌 항목 기록 — Leaflet/Turf 기능 커버리지, 500–2,000 feature 캡, 키 불요 데이터 소스 6종은 모두 타당하다",
+      "confidence": "high",
+      "related": [
+        "MRG-036"
+      ],
+      "resolved": false,
+      "round1_note": "보고서 '잘된 점'의 근거. 수정 불필요."
+    },
+    {
+      "id": "MRG-068",
+      "sources": [
+        "STR-039",
+        "GIS-030"
+      ],
+      "dimensions": [
+        "gis-feasibility",
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": true,
+      "section": "§22",
+      "summary": "v1.1이 신설한 Imagery preview 행의 Change Detection ✓에 대응 FR이 없어 같은 개정이 도입한 범례를 즉시 위반한다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "두 축이 독립적으로 동일 셀을 지목했다. [조율 종결 — 방향 B 확정] GIS 축 실측으로 §22 Imagery preview 행의 Change Detection 열 ✓ 제거로 확정하고, 구조 축은 원안 (A) FR-CD-012 신설안을 철회했다. 실측: STAC 썸네일은 343×343 px이고 MGRS 타일 한 변이 109.8 km라 픽셀당 지상거리 약 320 m. 변화 폴리곤은 4.0km²가 약 6px, 0.6km²가 약 2px, 0.12km²가 약 1px이며 CD의 AOI는 통상 타일 일부라 5×5km AOI가 썸네일에서 약 15×15px에 불과하다. 판정의 의미는 '장면 대조가 불필요하다'가 아니라 '썸네일 충실도로는 불가능하다'다 — 육안 대조 자체는 필요하다(NDVI 차분은 구름 그림자와 벌목을 수치로 구분하지 못한다). (A)를 정당화할 유일한 목적이 성립하지 않고 §21.8에 넣어도 '무엇이 보이면 통과인가'에 답할 수 없어 판정 불가 수용 기준만 하나 늘어난다. 장면 대조는 폐기가 아니라 §21.7/§20.5의 evolution request로 등록한다 — 올바른 형태는 Python worker가 이미 수행하는 AOI 윈도우 읽기로 visual 에셋의 AOI 크기 PNG를 만들어 오버레이하는 것이며, 해상도 문제가 원천 해결되고 새 브라우저 의존성도 필요 없다. 이 문장을 남겨야 다음 라운드에서 (A)가 근거 없이 되살아나지 않는다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-069",
+      "sources": [
+        "STR-040"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§31",
+      "summary": "§31 규칙 1이 FR 없는 수용 기준을 spec defect로 규정하는데 PRD 자신의 진화 수용 기준 7건이 FR을 인용하지 않는다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "규칙 3에 따라 SPEC.md로 옮겨지면 7개 앱 SPEC이 전부 위반 상태로 태어난다. 근인은 §30 항목 11·12에 대응하는 FR이 어느 앱 섹션에도 없다는 것. 권장은 (A) FR-COMMON-001로 진화 능력을 FR로 승격 — §22 범례의 '모든 ✓는 FR로 뒷받침' 규율과 일관된다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-070",
+      "sources": [
+        "STR-042"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§12",
+      "summary": "§12가 도입한 resultRef/resultVersion 재조회 채널이 §8.2 동기화 계약과 §8.3 서버 책임 목록에 접합되지 않았다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "GIS 축도 같은 접합 공백을 독립 관찰했으나 구조 축 소관으로 보고 중복 발행하지 않았다(03_gis_findings.md의 '별도 발행하지 않은 접합 1건'). 사실상 교차 확인된 건이다. 핵심은 resultVersion 변경 시 stateVersion도 증가하는지가 미정이라는 것 — 증가하지 않으면 클라이언트는 결과 변경을 영영 감지할 수 없다. [조율 보강] GIS 축이 구체 시나리오를 제공해 위험이 확정됐다 — §16의 뷰포트 이동으로 Overpass 재질의가 일어나면 레이어의 피처 본문만 바뀌고 상태의 다른 필드는 그대로다. 이때 stateVersion이 오르지 않으면 §8.2 폴링 클라이언트는 결과 갱신을 아예 감지하지 못한다. 이론적 가능성이 아니라 Explorer의 기본 사용 흐름에서 바로 발생한다. 정본은 STR-042이고 해소된 GIS-028(§12 참조 스키마)은 그 전제를 제공한 건으로 인접 배치한다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-072",
+      "sources": [
+        "STR-041"
+      ],
+      "dimensions": [
+        "structure"
+      ],
+      "severity": "minor",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§17.7",
+      "summary": "Search 수용 기준의 범위 인용 한 줄이 5개 공간 술어의 유일한 판정 근거여서 pass/fail이 불가능하다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "FR ID 부착 과정에서 생긴 잔여물 — 'Turf.js-based spatial operations work (FR-SEARCH-001–FR-SEARCH-006)' 한 줄이 5개 FR을 뭉뚱그린다. MRG-028(라운드 1) 해소의 마감 누락이다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-073",
+      "sources": [
+        "ANA-012"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§8.3",
+      "summary": "인바운드 자동 푸시를 요구하면서 채널·릴레이를 미채택하고 대체 수단으로 pull 성격의 인박스 API를 지목한다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "요구('the agent never polls manually')와 대체 수단(인박스 API)이 서로를 부정한다 — 인박스는 pull 자료구조라 무언가가 큐를 비워 세션에 밀어 넣지 않으면 에이전트는 폴링할 수밖에 없다. 스킬 미채택과 릴레이 역할 제거는 다른데 현재 문안은 후자로 읽힌다. 릴레이 역할을 한 줄 명시하거나, 폴링을 허용하되 'never polls manually' 문구를 함께 수정하고 트레이드오프를 남길 것.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-074",
+      "sources": [
+        "ANA-013"
+      ],
+      "dimensions": [
+        "ana-alignment"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§8.2",
+      "summary": "동기화 계약과 map.center가 결합돼 한 기기의 지도 이동이 다른 기기 화면을 강제로 끌고 간다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "**라운드 1 권고의 미반영분이다.** 라운드 1 MRG-022(ANA-006)의 권고에 이미 map.view/observedView 2키 분리와 300ms trailing 디바운스가 명시돼 있었으나, v1.1은 서버 영속화 절반만 채택했다. 그 결과 라운드 1에서 예견된 문제가 그대로 표면화됐다. 또한 팬/줌은 연속 제스처라 쓰기 빈도 규정이 없으면 stateVersion이 초당 수십 회 증가해 폴링 계약 자체가 흔들린다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-075",
+      "sources": [
+        "GIS-031"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§19.4",
+      "summary": "FR-ROUTE-010의 100km² 상한과 2km 패딩 규칙이 충돌할 때의 동작이 정의되지 않았다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "출발·도착이 대각 약 12km 이상 떨어지면 패딩 포함 bbox가 이미 상한을 넘는다(대각 20km면 약 324km²). 거부인지 절단인지 무시인지가 없어, 절단 구현에서는 사용자가 '경로 없음'을 네트워크 범위 탓이 아니라 실제 도로 단절로 오해한다. 초과 시 거부 + 가시적 사유(§25)를 명시하고, 이 상한이 사실상 경로 길이 상한(대각 약 12km)임을 §5 Non-Goals와 함께 드러내는 편이 정직하다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-076",
+      "sources": [
+        "GIS-032"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "major",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§8.4",
+      "summary": "프록시 규칙이 브라우저 fetch만 전제해 실제 데이터 경로 둘(worker의 COG range read, 브라우저 이미지 오버레이)이 회색지대에 남는다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "첫 문장은 'asset downloads'를 포함한 모든 외부 요청에 프록시를 강제하고 둘째 문장은 금지 대상을 브라우저로 한정해 범위가 어긋난다. 프록시가 Range 헤더와 206 응답을 그대로 전달하지 않으면 부분 읽기가 조용히 전체 파일 다운로드로 퇴화한다(밴드당 수백 MB). MRG-039와 한 쌍이며 둘 중 하나만 고치면 성능 요구가 무력화된다. FR-SAT-010의 썸네일도 <img> 직접 로드라 프록시 URL이어야 한다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    },
+    {
+      "id": "MRG-077",
+      "sources": [
+        "GIS-033"
+      ],
+      "dimensions": [
+        "gis-feasibility"
+      ],
+      "severity": "minor",
+      "round1_severity": null,
+      "status": "new",
+      "cross_confirmed": false,
+      "section": "§20.3",
+      "summary": "FR-SAT-010의 구현 세부 둘이 실제 데이터와 어긋난다 — overview 에셋은 없고 footprint는 사각형이 아니다",
+      "confidence": "high",
+      "related": [],
+      "round2_note": "실제 아이템(S2B_52SCF_20250725_0_L2A) 확인: thumbnail(image/jpeg, 공개 https)은 있으나 overview 키는 없다. 또 STAC geometry는 UTM 타일이 위경도로 투영된 사변형이라 L.imageOverlay의 직사각형 bounds로는 정확히 맞출 수 없고, item.bbox 사용 시 코너에서 최대 약 2.6km 어긋난다(대각 158km의 1.6%). 오차는 명시하되 허용하는 편이 낫다 — FR이 이미 'scene-level visual context'로 충실도를 한정했고, 단서가 없으면 구현자가 §14에 없는 회전 오버레이 플러그인을 도입하게 된다.",
+      "resolved": false,
+      "introduced_by": "v1.1 개정"
+    }
+  ],
+  "pending_coordination": [],
+  "closed_coordination": [
+    {
+      "items": [
+        "MRG-017",
+        "GIS-030 2부"
+      ],
+      "result": "STR-013에 귀속, 신규 발행 없음. 구조 축 전수 점검으로 미뒷받침 25셀 확인(matrix_audit 참조)."
+    },
+    {
+      "items": [
+        "MRG-014",
+        "MRG-071"
+      ],
+      "result": "병합. 리포터의 잠정 판단(인접 배치)은 구조 축이 프레이밍을 철회하면서 전제가 사라져 함께 철회했다."
+    },
+    {
+      "items": [
+        "MRG-068"
+      ],
+      "result": "방향 B 확정(CD 열 ✓ 제거). GIS 축 실측 근거, 구조 축이 원안 (A)를 철회."
+    }
+  ],
+  "matrix_audit": {
+    "source": "구조 축 전수 점검 (20행 × 7앱)",
+    "headline": "v1.1이 범례를 신설해 '모든 ✓는 해당 앱 FR로 뒷받침되어야 한다'고 못박았는데, 정작 매트릭스가 25곳에서 그 규칙을 지키지 않는다.",
+    "unbacked_cells": 25,
+    "rows": [
+      {
+        "row": "Leaflet map",
+        "apps": "Explorer·Search·Site·Route·Satellite·CD",
+        "cells": 6,
+        "owner": "MRG-017"
+      },
+      {
+        "row": "Marker",
+        "apps": "동일 6개 앱",
+        "cells": 6,
+        "owner": "MRG-017"
+      },
+      {
+        "row": "GeoJSON",
+        "apps": "Site·Satellite",
+        "cells": 2,
+        "owner": "MRG-017"
+      },
+      {
+        "row": "OSM",
+        "apps": "Search·Site",
+        "cells": 2,
+        "owner": "MRG-008 / MRG-006"
+      },
+      {
+        "row": "Overpass",
+        "apps": "Search·Site",
+        "cells": 2,
+        "owner": "MRG-008 / MRG-006"
+      },
+      {
+        "row": "POI discovery",
+        "apps": "Search·Site·Route",
+        "cells": 3,
+        "owner": "MRG-008 / MRG-006 / MRG-007"
+      },
+      {
+        "row": "Buffer",
+        "apps": "Site",
+        "cells": 1,
+        "owner": "MRG-041"
+      },
+      {
+        "row": "STAC",
+        "apps": "Change Detection",
+        "cells": 1,
+        "owner": "MRG-009"
+      },
+      {
+        "row": "Sentinel-2",
+        "apps": "Change Detection",
+        "cells": 1,
+        "owner": "MRG-009"
+      },
+      {
+        "row": "Imagery preview",
+        "apps": "Change Detection",
+        "cells": 1,
+        "owner": "MRG-068"
+      }
+    ],
+    "two_causes": [
+      {
+        "cause": "공통 프론트엔드 요구가 앱별 FR로 내려오지 않음",
+        "cells": 14,
+        "owner": "MRG-017",
+        "fix": "§10.1 한 문장 수정이면 끝난다"
+      },
+      {
+        "cause": "앱별 능력 요구 자체의 누락",
+        "cells": 11,
+        "owner": "MRG-006·007·008·009·041·068",
+        "fix": "각 앱에 FR을 신설하거나 ✓를 제거하는 개별 작업"
+      }
+    ],
+    "do_not_merge": "원인과 수정 위치가 갈리므로 하나로 묶지 않는다 — 묶으면 수정 위치가 일곱 군데인 finding이 되어 추적이 깨진다. 클러스터 머리에 표만 한 번 싣는다.",
+    "improvement": "Network graph 행의 Route ✓는 FR-ROUTE-010 신설로 뒷받침을 얻었다 — 라운드 1 대비 개선 사례.",
+    "representative": "Marker 행 — 7개 앱 전부 ✓인데 마커를 요구하는 FR은 FR-MAP-005·006 둘뿐이고 §16~§21에는 마커·pan/zoom·fit bounds FR이 하나도 없다."
+  }
+}
