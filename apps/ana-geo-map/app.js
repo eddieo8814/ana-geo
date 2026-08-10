@@ -91,6 +91,8 @@ function layerRow(id, label, count, visible, onToggle, checked) {
   const span = document.createElement('span'); span.textContent = label;
   const cnt = document.createElement('span'); cnt.className = 'count'; cnt.textContent = count ?? '';
   row.append(cb, span, cnt);
+  row.style.cursor = 'pointer';
+  row.addEventListener('click', (e) => { if (e.target !== cb) cb.click(); }); // 행 전체가 터치 타깃 (>=44px 가이드)
   return row;
 }
 
@@ -163,7 +165,7 @@ function setupEvents() {
 
 function renderFeedItem(item) {
   const div = document.createElement('div');
-  div.className = `msg ${item.role}`;
+  div.className = item.kind === 'activity' ? 'msg activity' : `msg ${item.role}`;
   div.textContent = item.text || '';
   $('feed').appendChild(div);
   $('feed').scrollTop = $('feed').scrollHeight;

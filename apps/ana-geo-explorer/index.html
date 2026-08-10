@@ -1,78 +1,134 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-explorer</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:280px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
-  #panel h2:first-child { margin-top:0; }
-  .cat-row, .layer-row { display:flex; align-items:center; gap:8px; padding:3px 0; }
-  .cat-row .swatch { width:10px; height:10px; border-radius:50%; flex:none; }
-  .cat-row label { flex:1; cursor:pointer; }
-  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; }
-  #findbtn { width:100%; margin-top:8px; background:#0ea5e91f; border-color:#0ea5e955; }
-  #findbtn[disabled] { opacity:.55; cursor:progress; }
-  #map { flex:1; }
-  #detail { font-size:13px; color:var(--dim); }
-  #detail .dt-name { color:var(--text); font-weight:600; font-size:14px; }
-  #detail table { border-collapse:collapse; width:100%; margin-top:6px; }
-  #detail td { padding:1px 0; vertical-align:top; word-break:break-all; }
-  #detail td:first-child { color:var(--dim); padding-right:8px; white-space:nowrap; }
-  #detail .tags { margin-top:6px; max-height:180px; overflow:auto; border-top:1px solid var(--line); padding-top:4px; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:160px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  button { padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; }
-  button:hover { border-color:var(--accent); }
-  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; }
-  #warn { color:#fbbf24; }
-  .leaflet-popup-content { font:13px/1.45 system-ui,sans-serif; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+
+  /* app.js가 인라인 스타일로 참조하는 레거시 변수 별칭 (다크모드 자동 대응) */
+  :root { --dim: var(--text-weak); }
+
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 284px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text-weak); margin: 0 0 8px; }
+  #map { flex: 1; min-width: 0; }
+
+  /* 카테고리 체크리스트 (FR-EXP-008) — 행 전체가 터치 타깃 */
+  .cat-row { display: flex; align-items: center; gap: 9px; min-height: 42px; font-weight: 600; }
+  .cat-row input[type="checkbox"] { width: 19px; height: 19px; flex: none; accent-color: var(--blue); cursor: pointer; }
+  .cat-row .swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .cat-row label { flex: 1; align-self: stretch; display: flex; align-items: center; cursor: pointer; font-size: 14px; }
+
+  /* 결과 레이어 목록 (FR-EXP-003/004/006/007) — 건수는 굵게·블루 */
+  .layer-row { display: flex; align-items: center; gap: 9px; min-height: 42px; font-weight: 600; }
+  .layer-row input[type="checkbox"] { width: 19px; height: 19px; flex: none; accent-color: var(--blue); cursor: pointer; }
+  .layer-row .count { margin-left: auto; font-weight: 800; color: var(--blue); font-size: 14px; letter-spacing: -0.03em; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 14px;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
+         transition: transform .08s ease, background .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  #findbtn { width: 100%; margin-top: 8px; background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--sh-fab); }
+  #findbtn:hover { background: var(--blue-700); border-color: var(--blue-700); color: #fff; }
+  #findbtn[disabled] { opacity: .55; cursor: progress; box-shadow: none; transform: none; }
+
+  /* 선택 상세 (FR-EXP-005) */
+  #detail { font-size: 13px; color: var(--text-sub); }
+  #detail .dt-name { color: var(--text); font-weight: 800; font-size: 15px; letter-spacing: -0.03em; margin-bottom: 6px; }
+  #detail table { border-collapse: collapse; width: 100%; }
+  #detail td { padding: 2px 0; vertical-align: top; word-break: break-all; }
+  #detail td:first-child { color: var(--text-weak); padding-right: 10px; white-space: nowrap; font-weight: 600; }
+  #detail .tags { margin-top: 8px; max-height: 190px; overflow: auto; border-top: 1px solid var(--line-2); padding-top: 6px;
+                  font: 11.5px/1.6 ui-monospace, SFMono-Regular, monospace; }
+
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--bg); border-top: 1px solid var(--line-2); }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px; font-size: 12.5px; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+  #s-note { color: var(--text-weak); font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 168px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  /* app.js는 #err의 class를 ''(오류) 또는 'warn'(경고)으로 바꾼다 */
+  #err { color: var(--warm-fg); padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; }
+  #err.warn { color: var(--text-sub); }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  /* Leaflet 팝업은 자체 흰 배경을 갖는다 — 래퍼까지 토큰으로 덮어야 다크에서 읽힌다 */
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); box-shadow: var(--sh-card); }
+  .leaflet-popup-content-wrapper { border-radius: var(--r-sm); }
+  .leaflet-popup-content { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 14px; }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--text-weak); }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 60%; width: min(284px, 82vw); }
+    .msg { max-width: 86%; }
+  }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-explorer</h1>
-    <span class="q">What is there? — OpenStreetMap discovery over the ANA runtime</span>
+    <span class="pill badge-cool q">What is there?</span>
+    <span class="pill badge-warm q" style="margin-left:auto">OpenStreetMap · Overpass</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Categories</h2>
-      <div id="cats"></div>
-      <button id="findbtn">Find in view</button>
-      <h2>Result layers</h2>
-      <div id="layers"></div>
-      <h2>Selection</h2>
-      <div id="detail">Click a result to see its OSM detail.</div>
+      <div class="card">
+        <h2>Categories</h2>
+        <div id="cats"></div>
+        <button class="btn" id="findbtn" aria-label="현재 화면 범위에서 검색">Find in view</button>
+      </div>
+      <div class="card">
+        <h2>Result layers</h2>
+        <div id="layers"></div>
+      </div>
+      <div class="card">
+        <h2>Selection</h2>
+        <div id="detail">Click a result to see its OSM detail.</div>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
-    <span>Results <b id="s-count">0</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
+    <span class="pill">Results<b id="s-count">0</b></span>
     <span id="s-note"></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find cafes around here."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find cafes around here."' autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>

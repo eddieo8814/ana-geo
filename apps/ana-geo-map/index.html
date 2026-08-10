@@ -1,68 +1,107 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-map</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:260px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:12px 0 6px; }
-  #panel h2:first-child { margin-top:0; }
-  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
-  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
-  #map { flex:1; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:160px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  button { padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; }
-  button:hover { border-color:var(--accent); }
-  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; }
-  input[type="file"] { display:none; }
-  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 264px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text-weak); margin: 0 0 8px; }
+  .layer-row { display: flex; align-items: center; gap: 8px; min-height: 32px; font-weight: 600; }
+  .layer-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--blue); }
+  .layer-row .count { margin-left: auto; font-weight: 800; color: var(--blue); font-size: 13px; letter-spacing: -0.02em; }
+  #markerinfo { color: var(--text-sub); font-size: 13px; }
+  #map { flex: 1; min-width: 0; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 14px;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
+         transition: transform .08s ease, background .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  input[type="file"] { display: none; }
+
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--bg); border-top: 1px solid var(--line-2); }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px; font-size: 12.5px; color: var(--text-sub); font-weight: 600; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 168px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  #err { color: var(--warm-fg); padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 40%; width: min(280px, 80vw); }
+    .msg { max-width: 86%; }
+  }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); box-shadow: var(--sh-card); }
+  .leaflet-popup-content-wrapper { border-radius: var(--r-sm); }
+  .leaflet-popup-content { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 14px; }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--text-weak); }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-map</h1>
-    <span class="q">Where is it? — the smallest Agent-Native GIS</span>
+    <span class="pill badge-cool q">Where is it?</span>
+    <span class="pill badge-warm q" style="margin-left:auto">Agent-Native GIS</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Layers</h2>
-      <div id="layers"></div>
-      <h2>GeoJSON</h2>
-      <label class="btn" for="geofile">Load GeoJSON…</label>
-      <input type="file" id="geofile" accept=".json,.geojson" />
-      <h2>Markers</h2>
-      <div id="markerinfo" style="color:var(--dim);font-size:13px">Click the map to add a marker.</div>
-      <button id="clearmarkers" style="margin-top:6px;font-size:13px">Remove all markers</button>
+      <div class="card">
+        <h2>Layers</h2>
+        <div id="layers"></div>
+      </div>
+      <div class="card">
+        <h2>GeoJSON</h2>
+        <label class="btn" for="geofile" role="button" tabindex="0" aria-label="GeoJSON 파일 불러오기">📂 Load GeoJSON…</label>
+        <input type="file" id="geofile" accept=".json,.geojson" />
+      </div>
+      <div class="card">
+        <h2>Markers</h2>
+        <div id="markerinfo">Click the map to add a marker.</div>
+        <button class="btn" id="clearmarkers" style="margin-top:8px" aria-label="모든 마커 제거">Remove all markers</button>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
     <span id="s-note"></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Move the map to Daejeon."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Move the map to Daejeon."' autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>

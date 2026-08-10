@@ -3,7 +3,7 @@
     "name": "ana-geo-satellite-change-detection",
     "version": "0.1.0"
   },
-  "stateVersion": 1,
+  "stateVersion": 26,
   "map": {
     "view": {
       "center": [
@@ -12,24 +12,173 @@
       ],
       "zoom": 12
     },
-    "observedView": null,
+    "observedView": {
+      "center": [
+        36.75715139836072,
+        127.82979011535646
+      ],
+      "zoom": 14
+    },
     "baseLayer": "osm"
   },
   "markers": [],
   "sceneSearch": {
     "collection": "sentinel-2-l2a",
-    "bbox": [],
+    "bbox": [
+      127.19387054443361,
+      36.26088488346501,
+      127.57495880126955,
+      36.43978983569057
+    ],
     "datetime": "2026-02-01/2026-08-10",
     "maxCloudCover": 20,
     "limit": 40,
     "requestId": 0,
-    "lastRunAt": null,
-    "resultCount": 0,
+    "lastRunAt": "2026-08-10T21:33:13.643Z",
+    "resultCount": 16,
     "note": null
   },
   "scenes": {
-    "before": null,
-    "after": null
+    "before": {
+      "id": "S2C_52SCF_20260804_0_L2A",
+      "collection": "sentinel-2-l2a",
+      "datetime": "2026-08-04T02:27:27.714000Z",
+      "platform": "sentinel-2c",
+      "cloudCover": 17.845671,
+      "gridCode": "MGRS-52SCF",
+      "bbox": [
+        126.751632,
+        36.036177,
+        127.998537,
+        37.042238
+      ],
+      "assetKeys": [
+        "aot",
+        "aot-jp2",
+        "blue",
+        "blue-jp2",
+        "cloud",
+        "coastal",
+        "coastal-jp2",
+        "granule_metadata",
+        "green",
+        "green-jp2",
+        "nir",
+        "nir-jp2",
+        "nir08",
+        "nir08-jp2",
+        "nir09",
+        "nir09-jp2",
+        "product_metadata",
+        "red",
+        "red-jp2",
+        "rededge1",
+        "rededge1-jp2",
+        "rededge2",
+        "rededge2-jp2",
+        "rededge3",
+        "rededge3-jp2",
+        "scl",
+        "scl-jp2",
+        "snow",
+        "swir16",
+        "swir16-jp2",
+        "swir22",
+        "swir22-jp2",
+        "thumbnail",
+        "tileinfo_metadata",
+        "visual",
+        "visual-jp2",
+        "wvp",
+        "wvp-jp2"
+      ],
+      "assets": {
+        "red": {
+          "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/52/S/CF/2026/8/S2C_52SCF_20260804_0_L2A/B04.tif",
+          "scale": 0.0001,
+          "offset": 0,
+          "offsetSource": "already applied to pixels (earthsearch:boa_offset_applied)",
+          "band": "B04"
+        },
+        "nir": {
+          "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/52/S/CF/2026/8/S2C_52SCF_20260804_0_L2A/B08.tif",
+          "scale": 0.0001,
+          "offset": 0,
+          "offsetSource": "already applied to pixels (earthsearch:boa_offset_applied)",
+          "band": "B08"
+        }
+      }
+    },
+    "after": {
+      "id": "S2B_52SCF_20260220_0_L2A",
+      "collection": "sentinel-2-l2a",
+      "datetime": "2026-02-20T02:27:23.610000Z",
+      "platform": "sentinel-2b",
+      "cloudCover": 1.158596,
+      "gridCode": "MGRS-52SCF",
+      "bbox": [
+        126.751632,
+        36.036177,
+        127.998537,
+        37.042238
+      ],
+      "assetKeys": [
+        "aot",
+        "aot-jp2",
+        "blue",
+        "blue-jp2",
+        "cloud",
+        "coastal",
+        "coastal-jp2",
+        "granule_metadata",
+        "green",
+        "green-jp2",
+        "nir",
+        "nir-jp2",
+        "nir08",
+        "nir08-jp2",
+        "nir09",
+        "nir09-jp2",
+        "product_metadata",
+        "red",
+        "red-jp2",
+        "rededge1",
+        "rededge1-jp2",
+        "rededge2",
+        "rededge2-jp2",
+        "rededge3",
+        "rededge3-jp2",
+        "scl",
+        "scl-jp2",
+        "snow",
+        "swir16",
+        "swir16-jp2",
+        "swir22",
+        "swir22-jp2",
+        "thumbnail",
+        "tileinfo_metadata",
+        "visual",
+        "visual-jp2",
+        "wvp",
+        "wvp-jp2"
+      ],
+      "assets": {
+        "red": {
+          "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/52/S/CF/2026/2/S2B_52SCF_20260220_0_L2A/B04.tif",
+          "scale": 0.0001,
+          "offset": 0,
+          "offsetSource": "already applied to pixels (earthsearch:boa_offset_applied)",
+          "band": "B04"
+        },
+        "nir": {
+          "href": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/52/S/CF/2026/2/S2B_52SCF_20260220_0_L2A/B08.tif",
+          "scale": 0.0001,
+          "offset": 0,
+          "offsetSource": "already applied to pixels (earthsearch:boa_offset_applied)",
+          "band": "B08"
+        }
+      }
+    }
   },
   "detection": {
     "method": "ndvi-difference",
@@ -38,10 +187,275 @@
     "minRegionSqM": 10000,
     "regionLimit": null,
     "requestId": 0,
-    "lastRunAt": null,
+    "lastRunAt": "2026-08-10T21:35:10.436Z",
     "note": null
   },
-  "layers": [],
-  "selection": null,
-  "analysis": null
+  "layers": [
+    {
+      "id": "stac-scenes",
+      "type": "geojson",
+      "visible": true,
+      "source": "earth-search",
+      "resultRef": "/api/results/stac-scenes",
+      "resultVersion": 1,
+      "label": "Scene footprints",
+      "category": "scene-footprint",
+      "featureCount": 16,
+      "bbox": [
+        127.19387054443361,
+        36.26088488346501,
+        127.57495880126955,
+        36.43978983569057
+      ]
+    },
+    {
+      "id": "change-regions",
+      "type": "geojson",
+      "visible": true,
+      "source": "change-detection",
+      "resultRef": "/api/results/change-regions",
+      "resultVersion": 2,
+      "label": "Change regions",
+      "category": "ndvi-change",
+      "featureCount": 14,
+      "bbox": [
+        127.80339717864992,
+        36.746690498957655,
+        127.85103321075441,
+        36.76893602878401
+      ]
+    }
+  ],
+  "selection": {
+    "kind": "scene",
+    "id": "S2C_52SCF_20260804_0_L2A",
+    "datetime": "2026-08-04T02:27:27.714000Z",
+    "platform": "sentinel-2c",
+    "cloudCover": 17.845671,
+    "gridCode": "MGRS-52SCF",
+    "collection": "sentinel-2-l2a",
+    "assetKeys": [
+      "aot",
+      "aot-jp2",
+      "blue",
+      "blue-jp2",
+      "cloud",
+      "coastal",
+      "coastal-jp2",
+      "granule_metadata",
+      "green",
+      "green-jp2",
+      "nir",
+      "nir-jp2",
+      "nir08",
+      "nir08-jp2",
+      "nir09",
+      "nir09-jp2",
+      "product_metadata",
+      "red",
+      "red-jp2",
+      "rededge1",
+      "rededge1-jp2",
+      "rededge2",
+      "rededge2-jp2",
+      "rededge3",
+      "rededge3-jp2",
+      "scl",
+      "scl-jp2",
+      "snow",
+      "swir16",
+      "swir16-jp2",
+      "swir22",
+      "swir22-jp2",
+      "thumbnail",
+      "tileinfo_metadata",
+      "visual",
+      "visual-jp2",
+      "wvp",
+      "wvp-jp2"
+    ],
+    "source": "earth-search",
+    "fetchedAt": "2026-08-10T21:33:13.643Z"
+  },
+  "analysis": {
+    "changeDetection": {
+      "method": "ndvi-difference",
+      "beforeScene": "S2C_52SCF_20260804_0_L2A",
+      "afterScene": "S2B_52SCF_20260220_0_L2A",
+      "threshold": 0.2,
+      "direction": "both",
+      "changedAreaSqKm": 7.9025,
+      "regionsAreaSqKm": 7.727,
+      "regionCount": 14,
+      "regions": [
+        {
+          "id": "change-001",
+          "rank": 1,
+          "areaSqKm": 5.1042,
+          "areaSqM": 5104200,
+          "meanDiff": -0.4201,
+          "minDiff": -1.0009,
+          "maxDiff": -0.2,
+          "direction": "loss"
+        },
+        {
+          "id": "change-002",
+          "rank": 2,
+          "areaSqKm": 1.6777,
+          "areaSqM": 1677700,
+          "meanDiff": -0.4366,
+          "minDiff": -0.994,
+          "maxDiff": -0.2,
+          "direction": "loss"
+        },
+        {
+          "id": "change-003",
+          "rank": 3,
+          "areaSqKm": 0.5778,
+          "areaSqM": 577800,
+          "meanDiff": -0.0738,
+          "minDiff": -0.5905,
+          "maxDiff": 0.7298,
+          "direction": "loss"
+        },
+        {
+          "id": "change-004",
+          "rank": 4,
+          "areaSqKm": 0.1607,
+          "areaSqM": 160700,
+          "meanDiff": 0.3988,
+          "minDiff": 0.2003,
+          "maxDiff": 0.7477,
+          "direction": "gain"
+        },
+        {
+          "id": "change-005",
+          "rank": 5,
+          "areaSqKm": 0.0465,
+          "areaSqM": 46500,
+          "meanDiff": -0.3849,
+          "minDiff": -0.6793,
+          "maxDiff": -0.2014,
+          "direction": "loss"
+        },
+        {
+          "id": "change-006",
+          "rank": 6,
+          "areaSqKm": 0.0332,
+          "areaSqM": 33200,
+          "meanDiff": 0.2787,
+          "minDiff": 0.2,
+          "maxDiff": 0.5695,
+          "direction": "gain"
+        },
+        {
+          "id": "change-007",
+          "rank": 7,
+          "areaSqKm": 0.0241,
+          "areaSqM": 24100,
+          "meanDiff": -0.3362,
+          "minDiff": -0.5037,
+          "maxDiff": -0.2014,
+          "direction": "loss"
+        },
+        {
+          "id": "change-008",
+          "rank": 8,
+          "areaSqKm": 0.0185,
+          "areaSqM": 18500,
+          "meanDiff": -0.325,
+          "minDiff": -0.5891,
+          "maxDiff": -0.2,
+          "direction": "loss"
+        },
+        {
+          "id": "change-009",
+          "rank": 9,
+          "areaSqKm": 0.0184,
+          "areaSqM": 18400,
+          "meanDiff": 0.2592,
+          "minDiff": 0.2001,
+          "maxDiff": 0.4689,
+          "direction": "gain"
+        },
+        {
+          "id": "change-010",
+          "rank": 10,
+          "areaSqKm": 0.0162,
+          "areaSqM": 16200,
+          "meanDiff": 0.3463,
+          "minDiff": 0.2003,
+          "maxDiff": 0.5572,
+          "direction": "gain"
+        },
+        {
+          "id": "change-011",
+          "rank": 11,
+          "areaSqKm": 0.0147,
+          "areaSqM": 14700,
+          "meanDiff": 0.2817,
+          "minDiff": 0.2001,
+          "maxDiff": 0.4894,
+          "direction": "gain"
+        },
+        {
+          "id": "change-012",
+          "rank": 12,
+          "areaSqKm": 0.0143,
+          "areaSqM": 14300,
+          "meanDiff": 0.2711,
+          "minDiff": 0.2,
+          "maxDiff": 0.5484,
+          "direction": "gain"
+        },
+        {
+          "id": "change-013",
+          "rank": 13,
+          "areaSqKm": 0.0107,
+          "areaSqM": 10700,
+          "meanDiff": 0.304,
+          "minDiff": 0.2022,
+          "maxDiff": 0.4582,
+          "direction": "gain"
+        },
+        {
+          "id": "change-014",
+          "rank": 14,
+          "areaSqKm": 0.01,
+          "areaSqM": 10000,
+          "meanDiff": -0.2758,
+          "minDiff": -0.3569,
+          "maxDiff": -0.2016,
+          "direction": "loss"
+        }
+      ]
+    },
+    "raster": {
+      "tile": "MGRS-52SCF",
+      "crs": "EPSG:32652",
+      "pixelSizeM": [
+        10,
+        10
+      ],
+      "window": {
+        "colOff": 9317,
+        "rowOff": 3013,
+        "width": 429,
+        "height": 253
+      },
+      "changedPixels": 79025,
+      "validPixels": 108537,
+      "minRegionSqM": 10000,
+      "droppedRegions": 0
+    },
+    "aoiBbox": [
+      127.80339717864992,
+      36.746690498957655,
+      127.85103321075441,
+      36.76893602878401
+    ],
+    "ranAt": "2026-08-10T21:35:10.436Z",
+    "elapsedMs": 16472,
+    "notes": []
+  }
 }

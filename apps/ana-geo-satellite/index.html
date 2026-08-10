@@ -1,119 +1,185 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-satellite</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --aoi:#f59e0b; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:320px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
-  #panel h2:first-child { margin-top:0; }
-  #map { flex:1; }
-  .row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-  .row.tight { gap:4px; }
-  .hint { color:var(--dim); font-size:12px; }
-  code, .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
-  #bbox { color:var(--dim); word-break:break-all; margin-top:4px; }
-  input[type="date"], select { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 6px; font:inherit; font-size:13px; }
-  input[type="range"] { width:100%; accent-color:var(--accent); }
-  button { padding:6px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; }
-  button:hover:not(:disabled) { border-color:var(--accent); }
-  button:disabled { opacity:.5; cursor:default; }
-  button.on { border-color:var(--aoi); color:var(--aoi); }
-  button.primary { border-color:var(--accent); color:var(--accent); }
-  input[type="file"] { display:none; }
-  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
-  label.btn:hover { border-color:var(--accent); }
-  #scenes { display:flex; flex-direction:column; gap:4px; }
-  .scene { border:1px solid var(--line); border-radius:8px; padding:6px 8px; cursor:pointer; background:#0b1220; }
-  .scene:hover { border-color:var(--accent); }
-  .scene.active { border-color:var(--accent); background:#38bdf814; }
-  .scene .top { display:flex; justify-content:space-between; gap:8px; font-size:13px; }
-  .scene .id { color:var(--dim); font-size:11px; word-break:break-all; }
-  .cloud { color:var(--dim); font-size:12px; }
-  #detail dl { display:grid; grid-template-columns:auto 1fr; gap:2px 8px; font-size:12px; margin-top:4px; }
-  #detail dt { color:var(--dim); }
-  #detail dd { word-break:break-all; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; }
-  #err.warn { color:#fbbf24; }
-  #err.ok { color:#4ade80; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 300px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--text-weak); margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .hint { color: var(--text-weak); font-size: 12px; line-height: 1.5; }
+  #map { flex: 1; min-width: 0; }
+
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  #bbox { color: var(--text-sub); word-break: break-all; margin-top: 8px; font-size: 12px; }
+
+  input[type="date"], select {
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: var(--r-xs); padding: 8px 10px; font: inherit; font-size: 13px; min-height: 38px;
+  }
+  input[type="date"]:focus, select:focus { border-color: var(--blue); outline: none; }
+  input[type="range"] { width: 100%; accent-color: var(--blue); margin-top: 4px; }
+  input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); vertical-align: middle; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 14px;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
+         transition: transform .08s ease, background .12s ease, border-color .12s ease, color .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  .btn:disabled { opacity: .5; cursor: default; transform: none; }
+  .btn.on { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.primary:hover { background: var(--blue-700); border-color: var(--blue-700); color: #fff; }
+  input[type="file"] { display: none; }
+
+  /* JS creates the "Zoom to scene" button with no class — style bare buttons too */
+  #panel button:not(.btn) {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 6px 12px;
+    border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+    font-size: 12.5px; font-weight: 700; color: var(--text); cursor: pointer;
+    transition: transform .08s ease, background .12s ease, border-color .12s ease;
+  }
+  #panel button:not(.btn):hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  #panel button:not(.btn):active { transform: scale(.96); }
+
+  #cloud-label, #scene-count { font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
+
+  #scenes { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .scene { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 10px; cursor: pointer;
+           background: var(--surface-2); transition: border-color .12s ease, background .12s ease; }
+  .scene:hover { border-color: var(--blue); }
+  .scene.active { border-color: var(--blue); background: var(--blue-weak); }
+  .scene .top { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 700; }
+  .scene .id { color: var(--text-weak); font-size: 10.5px; word-break: break-all; margin-top: 2px; }
+  .scene .cloud { color: var(--text-sub); font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+  #detail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12.5px; margin-top: 4px; }
+  #detail dt { color: var(--text-weak); font-weight: 600; }
+  #detail dd { word-break: break-all; margin: 0; }
+
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--bg);
+               border-top: 1px solid var(--line-2); flex-wrap: wrap; }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px;
+                      font-size: 12.5px; color: var(--text-sub); font-weight: 600; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+  #s-note { color: var(--text-weak); font-size: 12px; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 168px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  #err { padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; }
+  #err.warn { color: var(--warm-fg); }
+  #err.ok { color: var(--green); }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 55%; width: min(300px, 86vw); }
+    .msg { max-width: 86%; }
+  }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); box-shadow: var(--sh-card); }
+  .leaflet-popup-content-wrapper { border-radius: var(--r-sm); }
+  .leaflet-popup-content { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 14px; }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--text-weak); }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-satellite</h1>
-    <span class="q">What did this place look like at a given time? — Sentinel-2 scene discovery</span>
+    <span class="pill badge-cool q">What did this place look like?</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Area of interest</h2>
-      <div class="row">
-        <button id="aoi-viewport">Use viewport</button>
-        <button id="aoi-draw">Draw rectangle</button>
-        <label class="btn" for="aoi-file">Load polygon…</label>
-        <input type="file" id="aoi-file" accept=".json,.geojson" />
-      </div>
-      <div class="hint">Shift-drag the map to draw directly, or click <em>Draw rectangle</em> then click two corners.</div>
-      <div id="bbox" class="mono">bbox —</div>
-
-      <h2>Date range</h2>
-      <div class="row tight">
-        <input type="date" id="date-start" />
-        <span class="hint">→</span>
-        <input type="date" id="date-end" />
+      <div class="card">
+        <h2>Area of interest</h2>
+        <div class="row">
+          <button class="btn" id="aoi-viewport" aria-label="현재 화면 범위를 AOI로 사용">Use viewport</button>
+          <button class="btn" id="aoi-draw" aria-label="사각형 그리기 모드 토글">Draw rectangle</button>
+          <label class="btn" for="aoi-file" role="button" tabindex="0" aria-label="폴리곤 파일 불러오기">📂 Load polygon…</label>
+          <input type="file" id="aoi-file" accept=".json,.geojson" />
+        </div>
+        <div class="hint" style="margin-top:8px">Shift-drag the map to draw directly, or click <em>Draw rectangle</em> then click two corners.</div>
+        <div id="bbox" class="mono">bbox —</div>
       </div>
 
-      <h2>Collection</h2>
-      <select id="collection"></select>
-
-      <h2>Max cloud cover — <span id="cloud-label">–</span></h2>
-      <input type="range" id="cloud" min="0" max="100" step="1" />
-
-      <div class="row" style="margin-top:12px">
-        <button id="search" class="primary">Search scenes</button>
-        <span id="searching" class="hint"></span>
+      <div class="card">
+        <h2>Date range</h2>
+        <div class="row">
+          <input type="date" id="date-start" aria-label="시작일" />
+          <span class="hint">→</span>
+          <input type="date" id="date-end" aria-label="종료일" />
+        </div>
       </div>
 
-      <h2>Scenes — <span id="scene-count">0</span></h2>
-      <div class="row" style="margin-bottom:6px">
-        <label class="hint"><input type="checkbox" id="show-footprints" /> Show footprints</label>
+      <div class="card">
+        <h2>Collection</h2>
+        <select id="collection" aria-label="컬렉션 선택"></select>
       </div>
-      <div id="scenes"></div>
-      <div id="scenes-empty" class="hint">No search has run yet.</div>
 
-      <h2>Active scene</h2>
-      <div id="detail" class="hint">Select a scene from the list or click a footprint on the map.</div>
+      <div class="card">
+        <h2>Max cloud cover <span id="cloud-label">–</span></h2>
+        <input type="range" id="cloud" min="0" max="100" step="1" aria-label="최대 구름 비율" />
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="search" aria-label="장면 검색">Search scenes</button>
+          <span id="searching" class="hint"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Scenes <span id="scene-count">0</span></h2>
+        <label class="hint" style="display:flex;align-items:center;gap:6px;min-height:28px">
+          <input type="checkbox" id="show-footprints" /> Show footprints
+        </label>
+        <div id="scenes"></div>
+        <div id="scenes-empty" class="hint">No search has run yet.</div>
+      </div>
+
+      <div class="card">
+        <h2>Active scene</h2>
+        <div id="detail" class="hint">Select a scene from the list or click a footprint on the map.</div>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
-    <span>Scenes <b id="s-scenes">–</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
+    <span class="pill">Scenes<b id="s-scenes">–</b></span>
     <span id="s-note"></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find Sentinel-2 images for Daejeon from July."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find Sentinel-2 images for Daejeon from July."' autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>

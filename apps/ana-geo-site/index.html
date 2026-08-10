@@ -1,137 +1,219 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-site</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --ok:#22c55e; --warn:#fb923c; --bad:#f87171; --gold:#facc15; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:370px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:16px 0 6px; display:flex; align-items:center; gap:8px; }
-  #panel h2:first-child { margin-top:0; }
-  #panel h2 .badge { margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; }
-  #map { flex:1; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:18px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #s-summary { color:var(--accent); }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  button { padding:7px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; }
-  button:hover { border-color:var(--accent); }
-  button.primary { background:#0ea5e922; border-color:var(--accent); }
-  button.on { background:#22c55e22; border-color:var(--ok); }
-  select, input[type="number"], input[type="text"] { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 6px; font-size:13px; }
-  #err { color:var(--bad); padding:0 16px 6px; font-size:13px; min-height:1em; }
-  #notice { color:var(--dim); font-size:12px; margin-top:6px; }
-  input[type="file"] { display:none; }
-  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
-  .row { display:flex; gap:6px; align-items:center; }
-  .row > * { flex:1; min-width:0; }
-  .row > .fixed { flex:none; }
-  .hint { color:var(--dim); font-size:12px; margin-top:4px; }
-  .rule { border:1px solid var(--line); border-radius:8px; padding:8px; margin-bottom:8px; background:#0f172a66; }
-  .rule .line { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
-  .rule .line:last-child { margin-bottom:0; }
-  .rule select, .rule input { flex:1; min-width:0; }
-  .rule .drop { flex:none; padding:2px 8px; }
-  .rule .tag { flex:none; color:var(--dim); font-size:12px; }
-  .caution { color:var(--warn); font-size:12px; border-left:2px solid var(--warn); padding:4px 8px; margin:6px 0; background:#fb923c14; }
-  .weightbar { display:flex; align-items:center; gap:8px; margin:6px 0; font-size:13px; }
-  .weightbar .sum { font-variant-numeric:tabular-nums; }
-  .weightbar.bad .sum { color:var(--bad); }
-  .weightbar.ok .sum { color:var(--ok); }
-  .cand { display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #33415555; cursor:pointer; }
-  .cand:hover { background:#33415533; }
-  .cand.sel { background:#38bdf822; }
-  .cand .rank { flex:none; width:30px; color:var(--dim); font-variant-numeric:tabular-nums; }
-  .cand .score { margin-left:auto; font-variant-numeric:tabular-nums; }
-  .cand.top .rank, .cand.top .score { color:var(--gold); }
-  .cand.out .score { color:var(--bad); }
-  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
-  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
-  .layer-row .dot { width:9px; height:9px; border-radius:50%; flex:none; }
-  #explain { font-size:13px; margin-top:6px; }
-  #explain .head { font-weight:600; margin-bottom:4px; }
-  #explain .line { color:var(--dim); padding:1px 0; }
-  #explain .line b { color:var(--text); }
-  .cand-tip { background:#0f172ade; border:1px solid #334155; color:#e2e8f0; font-size:11px; padding:1px 5px; }
-  .cand-tip::before { display:none; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* app.js가 가중치 오류 색으로 var(--bad)를 인라인 지정한다(FR-SITE-005).
+     JS는 손대지 않고, 그 이름을 디자인 시스템의 경고 토큰에 연결한다. */
+  :root { --bad: var(--warm-fg); }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 320px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+              color: var(--text-weak); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  #panel h2 .badge { margin-left: auto; font-size: 11px; padding: 3px 9px; letter-spacing: 0; text-transform: none; }
+  #map { flex: 1; min-width: 0; }
+  .hint { color: var(--text-weak); font-size: 12px; font-weight: 500; margin-top: 6px; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 14px;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
+         transition: transform .08s ease, background .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--sh-fab); }
+  .btn.primary:hover { background: var(--blue-700); border-color: var(--blue-700); color: #fff; }
+  .btn.on { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  input[type="file"] { display: none; }
+
+  /* 폼 컨트롤 */
+  select, input[type="number"], input[type="text"] {
+    min-height: 36px; padding: 7px 10px; border-radius: var(--r-xs);
+    border: 1.5px solid var(--line); background: var(--surface-2); color: var(--text);
+    font-size: 13px; font-weight: 600; outline: none; }
+  select:focus, input[type="number"]:focus, input[type="text"]:focus { border-color: var(--blue); background: var(--surface); }
+  input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--blue); }
+
+  .row { display: flex; gap: 6px; align-items: center; }
+  .row > * { flex: 1; min-width: 0; }
+  .row > .fixed { flex: none; }
+
+  /* 후보 목록 (FR-SITE-001 / FR-SITE-009) — 순위·점수는 굵게·블루 */
+  .cand { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 8px;
+          margin: 0 -8px; border-radius: var(--r-xs); font-weight: 600; font-size: 13.5px; cursor: pointer;
+          transition: background .12s ease; }
+  .cand:hover { background: var(--surface-2); }
+  .cand.sel { background: var(--blue-weak); }
+  .cand .rank { flex: none; width: 30px; font-weight: 800; font-size: 13px; color: var(--text-weak); letter-spacing: -0.03em; }
+  .cand .score { margin-left: auto; font-weight: 800; font-size: 15px; color: var(--blue); letter-spacing: -0.04em; }
+  .cand.top .rank, .cand.top .score { color: var(--blue-700); }
+  .cand.top { background: var(--cool-bg); }
+  .cand.out .rank, .cand.out .score { color: var(--warm-fg); font-size: 13px; }
+  .cand .drop { flex: none; min-height: 28px; width: 28px; padding: 0; border-radius: 50%;
+                background: transparent; border: none; color: var(--text-weak); font-size: 15px; font-weight: 700; }
+  .cand .drop:hover { background: var(--warm-bg); color: var(--warm-fg); }
+
+  /* 레이어 목록 */
+  .layer-row { display: flex; align-items: center; gap: 8px; min-height: 34px; font-weight: 600; font-size: 13px; }
+  .layer-row .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .layer-row .count { margin-left: auto; font-weight: 800; color: var(--blue); font-size: 13px; letter-spacing: -0.02em; }
+
+  /* 규칙 카드 — 하드 제약(FR-SITE-002) / 소프트 기준(FR-SITE-003·004) */
+  .rule { border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 9px; margin-bottom: 8px; background: var(--surface-2); }
+  .rule .line { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .rule .line:last-child { margin-bottom: 0; }
+  .rule select, .rule input { flex: 1; min-width: 0; }
+  .rule .drop { flex: none; min-height: 30px; width: 30px; padding: 0; border-radius: 50%;
+                background: transparent; border: none; color: var(--text-weak); font-size: 15px; font-weight: 700; }
+  .rule .drop:hover { background: var(--warm-bg); color: var(--warm-fg); }
+  .rule .tag { flex: none; color: var(--text-weak); font-size: 11.5px; font-weight: 700; }
+
+  /* 데이터 품질 경고 (§25) */
+  .caution { background: var(--warm-bg); color: var(--warm-fg); border-radius: var(--r-xs);
+             padding: 8px 10px; margin: 8px 0; font-size: 12px; font-weight: 600; line-height: 1.45; }
+
+  /* 가중치 합계 (FR-SITE-005) */
+  .weightbar { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px;
+               font-size: 12px; font-weight: 700; color: var(--text-weak); }
+  .weightbar .sum { font-size: 18px; font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .weightbar.ok .sum { color: var(--blue); }
+  .weightbar.bad .sum { color: var(--warm-fg); }
+  #weight-err { font-size: 12px; font-weight: 600; line-height: 1.45; }
+
+  /* 점수 분해 (FR-SITE-010 / §23.3) */
+  #explain { margin-top: 10px; font-size: 12.5px; }
+  #explain .head { font-weight: 800; font-size: 13px; letter-spacing: -0.02em; margin-bottom: 5px; }
+  #explain .line { color: var(--text-sub); font-weight: 500; padding: 2px 0; }
+  #explain .line b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; }
+
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; overflow-x: auto;
+               background: var(--bg); border-top: 1px solid var(--line-2); }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px;
+                     font-size: 12.5px; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+  #statusbar .pill.wide { max-width: 46vw; overflow: hidden; }
+  #statusbar .pill.wide b { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+                            vertical-align: bottom; white-space: nowrap; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 168px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  #err { color: var(--warm-fg); padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; font-weight: 500; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  /* 지도 위 후보 배지 (geo/layers.js가 붙이는 툴팁) */
+  .cand-tip { background: var(--surface); border: 1px solid var(--line); color: var(--text);
+              box-shadow: var(--sh-card); border-radius: 999px; font-size: 11px; font-weight: 800;
+              letter-spacing: -0.02em; padding: 2px 8px; }
+  .cand-tip::before { display: none; }
+  .leaflet-popup-content-wrapper { border-radius: var(--r-sm); box-shadow: var(--sh-card); }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 46%; width: min(320px, 86vw); }
+    .msg { max-width: 86%; }
+  }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-site</h1>
-    <span class="q">Which candidate is best?</span>
+    <span class="pill badge-cool q">Which candidate is best?</span>
+    <span class="pill badge-warm q" style="margin-left:auto">Agent-Native GIS</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Candidates <span class="badge" id="cand-count">0</span></h2>
-      <div class="row">
-        <button id="pick" class="fixed">Add by map click</button>
-        <label class="btn fixed" for="candfile">Load GeoJSON…</label>
-        <input type="file" id="candfile" accept=".json,.geojson" />
-        <button id="clear-cands" class="fixed">Clear</button>
+      <div class="card">
+        <h2>Candidates <span class="pill badge-cool badge" id="cand-count">0</span></h2>
+        <div class="row">
+          <button class="btn" id="pick" aria-label="지도 클릭으로 후보 추가">Add by map click</button>
+          <label class="btn fixed" for="candfile" role="button" tabindex="0" aria-label="후보 GeoJSON 불러오기">📂</label>
+          <input type="file" id="candfile" accept=".json,.geojson" />
+          <button class="btn fixed" id="clear-cands" aria-label="모든 후보 제거">Clear</button>
+        </div>
+        <div class="hint">Points or polygons (FR-SITE-001). A polygon candidate is measured from its centroid.</div>
+        <div id="candidates"></div>
       </div>
-      <div class="hint">Points or polygons (FR-SITE-001). A polygon candidate is measured from its centroid.</div>
-      <div id="candidates"></div>
 
-      <h2>Reference features</h2>
-      <div class="row">
-        <select id="acq-class"></select>
-        <button id="acq-btn" class="fixed">Acquire</button>
+      <div class="card">
+        <h2>Reference features</h2>
+        <div class="row">
+          <select id="acq-class" aria-label="참조 피처 클래스"></select>
+          <button class="btn fixed" id="acq-btn" aria-label="Overpass에서 취득">Acquire</button>
+        </div>
+        <div class="hint">Fetches the class from Overpass inside the current map view, or load your own GeoJSON to replace it.</div>
+        <label class="btn" for="reffile" role="button" tabindex="0" style="margin-top:8px" aria-label="참조 GeoJSON 불러오기">📂 Load reference GeoJSON…</label>
+        <input type="file" id="reffile" accept=".json,.geojson" />
+        <div id="acq-caution"></div>
+        <div id="layers"></div>
+        <div id="notice" class="hint"></div>
       </div>
-      <div class="hint">Fetches the class from Overpass inside the current map view, or load your own GeoJSON to replace it.</div>
-      <label class="btn" for="reffile" style="margin-top:8px">Load reference GeoJSON…</label>
-      <input type="file" id="reffile" accept=".json,.geojson" />
-      <div id="acq-caution"></div>
-      <div id="layers"></div>
-      <div id="notice"></div>
 
-      <h2>Hard constraints <span class="badge" id="hc-count"></span></h2>
-      <div id="constraints"></div>
-      <div id="constraint-caution"></div>
-      <button id="add-constraint">+ Constraint</button>
-
-      <h2>Soft criteria &amp; weights</h2>
-      <div id="criteria"></div>
-      <div class="weightbar" id="weightbar">
-        <span>Σ weight</span><span class="sum" id="weight-sum">–</span>
-        <button id="normalize" class="fixed">Normalize</button>
+      <div class="card">
+        <h2>Hard constraints <span class="pill badge-cool badge" id="hc-count"></span></h2>
+        <div id="constraints"></div>
+        <div id="constraint-caution"></div>
+        <button class="btn" id="add-constraint" aria-label="하드 제약 추가">+ Constraint</button>
       </div>
-      <div id="weight-err" class="hint"></div>
-      <button id="add-criterion">+ Criterion</button>
 
-      <h2>Ranking</h2>
-      <button id="run" class="primary" style="width:100%">Rank candidates</button>
-      <div id="explain"></div>
+      <div class="card">
+        <h2>Soft criteria &amp; weights</h2>
+        <div id="criteria"></div>
+        <div class="weightbar" id="weightbar">
+          <span>Σ weight</span><span class="sum" id="weight-sum">–</span>
+          <button class="btn fixed" id="normalize" style="margin-left:auto" aria-label="가중치 정규화">Normalize</button>
+        </div>
+        <div id="weight-err"></div>
+        <button class="btn" id="add-criterion" style="margin-top:6px" aria-label="소프트 기준 추가">+ Criterion</button>
+      </div>
+
+      <div class="card">
+        <h2>Ranking</h2>
+        <button class="btn primary" id="run" style="width:100%" aria-label="후보 순위 계산">Rank candidates</button>
+        <div id="explain"></div>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
-    <span>Candidates <b id="s-cands">–</b></span>
-    <span>Eligible <b id="s-eligible">–</b></span>
-    <span>Top <b id="s-top">–</b></span>
-    <span>Rules <b id="s-summary">–</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
+    <span class="pill">Candidates<b id="s-cands">–</b></span>
+    <span class="pill">Eligible<b id="s-eligible">–</b></span>
+    <span class="pill">Top<b id="s-top">–</b></span>
+    <span class="pill wide">Rules<b id="s-summary">–</b></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Rank candidate locations using university proximity, roads, and residential separation."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Rank candidate locations using university proximity, roads, and residential separation."' autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>

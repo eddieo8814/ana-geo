@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
+<title>ana-channel-test — 채널 왕복 진단</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
+<style>
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px calc(60px + var(--safe-b)); }
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; margin: 0 -16px 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .sub { color: var(--text-sub); margin: -6px 0 20px; font-size: 14px; }
+  h2 { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin: 30px 0 12px; }
+  section p { color: var(--text-sub); }
+  code { background: var(--surface-2); border: 1px solid var(--line-2); padding: 1px 6px; border-radius: 6px;
+         font: 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; }
+  pre { background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-sm); box-shadow: var(--sh-card);
+        padding: 12px 14px; overflow-x: auto; margin: 8px 0; font: 12.5px/1.6 ui-monospace, SFMono-Regular, monospace; }
+  pre code, pre { border: none; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
+  th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 700; }
+
+  /* 신호등 카드 */
+  .lights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+  @media (max-width: 1023px) { .lights { grid-template-columns: repeat(2, 1fr); } }
+  .light { background: var(--surface); border-radius: var(--r); box-shadow: var(--sh-card); padding: 13px 14px; }
+  .light .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--text-weak); margin-right: 7px; }
+  .light.ok .dot { background: var(--green); box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent); }
+  .light.warn .dot { background: var(--warm-fg); box-shadow: 0 0 0 4px var(--warm-bg); }
+  .light.bad .dot { background: #F04452; box-shadow: 0 0 0 4px color-mix(in srgb, #F04452 15%, transparent); }
+  .light b { font-size: 13px; font-weight: 800; letter-spacing: -0.02em; }
+  .light .why { display: block; color: var(--text-sub); font-size: 12px; margin-top: 5px; min-height: 2.6em; }
+
+  /* 버튼 */
+  button { min-height: 44px; padding: 10px 18px; border-radius: 999px; background: var(--surface);
+           border: 1px solid var(--line); box-shadow: var(--sh-card); font-size: 13.5px; font-weight: 700;
+           transition: transform .08s ease, background .12s ease; }
+  button:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  button:active { transform: scale(.96); }
+  #btn-ping { background: var(--blue); color: #fff; border: none; box-shadow: var(--sh-fab); font-weight: 800; }
+  #btn-ping:hover { background: var(--blue-700); color: #fff; }
+  #pingresult { margin: 10px 0; font-size: 13.5px; font-weight: 600; min-height: 1.5em; }
+  .ok-t { color: var(--green); } .bad-t { color: #F04452; } .warn-t { color: var(--warm-fg); }
+
+  /* 채팅 카드 */
+  #chat { background: var(--surface); border-radius: var(--r); box-shadow: var(--sh-card); overflow: hidden; }
+  #feed { height: 230px; overflow: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 76%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, monospace; padding: 0 12px; max-width: 92%; }
+  #bar { display: flex; gap: 8px; padding: 10px 14px calc(10px + var(--safe-b)); border-top: 1px solid var(--line-2); }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #btn-send { background: var(--blue); color: #fff; border: none; font-weight: 800; }
+  #btn-send:hover { background: var(--blue-700); color: #fff; }
+
+  details { background: var(--surface); border-radius: var(--r-sm); box-shadow: var(--sh-card); padding: 10px 14px; margin: 8px 0; }
+  summary { cursor: pointer; font-weight: 700; font-size: 13.5px; padding: 4px 0; }
+  li { margin: 4px 0; } ul, ol { padding-left: 22px; color: var(--text-sub); }
+  ol li b, ul li b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="glass-header">
+    <h1>ana-channel-test</h1>
+    <span class="pill badge-cool" style="font-size:12px;padding:5px 11px">채널 왕복 진단</span>
+  </header>
+  <div class="sub">대시보드 ↔ 브리지 ↔ fakechat ↔ Claude Code 세션의 채팅 왕복이 제대로 되는지 단계별로 진단합니다.</div>
+
+  <h2>① 연결 상태 <span style="font-weight:600;font-size:12px;color:var(--text-weak)">(2.5초마다 자동 갱신)</span></h2>
+  <div class="lights">
+    <div class="light" id="L1"><span class="dot"></span><b>1. 앱 서버</b><span class="why">확인 중…</span></div>
+    <div class="light" id="L2"><span class="dot"></span><b>2. 브리지</b><span class="why">확인 중…</span></div>
+    <div class="light" id="L3"><span class="dot"></span><b>3. fakechat :8787</b><span class="why">확인 중…</span></div>
+    <div class="light" id="L4"><span class="dot"></span><b>4. 두뇌 응답</b><span class="why">확인 중…</span></div>
+  </div>
+
+  <h2>② 왕복 테스트</h2>
+  <p>
+    <button id="btn-ping" aria-label="핑 테스트 실행">🏓 핑 테스트 (전 구간 왕복)</button>
+    <button id="btn-echo" aria-label="셀프 에코 실행">🔁 셀프 에코 (서버·피드만 검증)</button>
+  </p>
+  <div id="pingresult" role="status"></div>
+  <div id="chat">
+    <div id="feed"></div>
+    <div id="bar">
+      <input id="chatinput" placeholder="자유 메시지 — 두뇌 세션이 있으면 응답이 옵니다" autocomplete="off" aria-label="메시지 입력" />
+      <button id="btn-send" aria-label="전송">Send</button>
+    </div>
+  </div>
+
+  <h2>③ 설정 가이드 (처음부터 순서대로)</h2>
+  <ol>
+    <li><b>플러그인 설치(최초 1회):</b> <code>claude plugin install fakechat@claude-plugins-official</code></li>
+    <li><b>앱 서버:</b> 이 디렉토리에서 <code>node server.js</code> → 이 페이지(<code>http://localhost:8808</code>)가 뜨면 신호등 1이 초록.</li>
+    <li><b>두뇌 세션(별도 터미널):</b> <code>./brain.sh</code> — 고아 fakechat을 정리한 뒤 <code>claude --channels plugin:fakechat@claude-plugins-official</code>를 실행한다. 세션 배너에 "Channels (experimental) …" 문구가 보여야 하고, 신호등 3이 초록이 된다.</li>
+    <li><b>브리지(별도 터미널):</b> <code>node fakechat-bridge.js</code> → "fakechat 연결됨" 로그가 뜨고 신호등 2가 초록.</li>
+    <li><b>왕복 확인:</b> 위의 <b>핑 테스트</b> 버튼. 두뇌 세션이 채널 메시지를 받아 <code>POST /api/agent</code>로 응답하면 신호등 4가 초록이 되고 왕복 시간이 표시된다. (이 앱의 <code>CLAUDE.md</code>가 세션에 핑 응답 규칙을 자동으로 알려준다.)</li>
+  </ol>
+  <p>채널이 붙는 시점은 <b>세션 기동 시점뿐</b>이다 — 플래그 없이 띄운 세션에는 나중에 채널을 붙일 수 없다.</p>
+
+  <h2>④ 트러블슈팅</h2>
+
+  <details open>
+    <summary>신호등 3이 빨강/주황 — fakechat이 없거나 고아다</summary>
+    <ul>
+      <li><b>주황(고아 의심)</b>: 이전 세션이 남긴 bun 서버가 8787을 점유했을 수 있다. 새 세션의 fakechat은 <code>EADDRINUSE</code>로 조용히 죽는다(<code>/mcp</code>에 <code>-32000</code>). 핑이 성공하면 사용 중인 것이니 유지하고, 실패하면:
+        <pre>lsof -iTCP:8787 -sTCP:LISTEN -n -P   # 부모(PPID)가 1(launchd)이면 고아
+kill &lt;PID&gt;                            # 고아 제거 후 세션 재시작 (또는 처음부터 ./brain.sh 사용)</pre></li>
+      <li><b>빨강(리스너 없음)</b>: 세션이 <code>--channels</code> 없이 떴거나 fakechat 기동 실패. 세션에서 <code>/mcp</code>로 상태 확인 → 실패면 세션 종료 후 <code>./brain.sh</code>로 재기동.</li>
+      <li>MCP 로그 직접 확인:
+        <pre>ls -t ~/Library/Caches/claude-cli-nodejs/*/mcp-logs-plugin-fakechat-fakechat/*.jsonl | head -1 | xargs tail -5</pre></li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>신호등 2가 빨강 — 브리지가 안 돌거나 서버를 못 찾는다</summary>
+    <ul>
+      <li><code>node fakechat-bridge.js</code>가 실행 중인지 확인. "fakechat 끊김, 2s 후 재접속" 루프면 문제는 브리지가 아니라 <b>신호등 3(fakechat)</b>이다.</li>
+      <li>포트가 다르면 <code>DASH_URL=http://127.0.0.1:8808 node fakechat-bridge.js</code>.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>신호등 4가 빨강 — 메시지는 가는데 응답이 안 온다</summary>
+    <ul>
+      <li><b>이분 탐색(가장 빠름)</b> — 브리지를 건너뛰고 채널에 직접 주입:
+        <pre>curl -s -X POST localhost:8787/ -F 'id=diag-1' -F 'text=진단'</pre>
+        세션 화면에 "진단"이 <b>뜨면</b>: 채널·세션은 정상 → 남은 원인은 세션이 응답을 <code>POST /api/agent</code>로 안 보내는 것. 세션에 역할 지시가 들어갔는지(이 디렉토리의 <code>CLAUDE.md</code>를 읽고 떴는지) 확인.<br/>
+        <b>안 뜨면</b>: 세션이 채널을 물지 않았다 → 신호등 3 항목으로.</li>
+      <li>세션이 fakechat의 <code>reply</code> 툴로만 답하면 대시보드에는 아무것도 안 보인다 — 응답은 반드시 <code>POST /api/agent</code>(필드명 <code>text</code>).</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>중간 과정·최종 응답이 채팅창에 안 보인다 (미러 훅)</summary>
+    <ul>
+      <li>이 앱은 <code>.claude/settings.json</code> 훅(<code>tools/mirror-hook.mjs</code>)이 세션의 텍스트·도구 활동을 자동 미러한다. 훅은 <b>세션 기동 시점</b>에 로드되므로 설정 변경 후엔 세션 재시작.</li>
+      <li>턴 마지막 텍스트는 Stop 훅 또는 배달 보증 watcher(최대 ~3초 지연)가 전달한다. 안 오면 훅 로그 확인:
+        <pre>cat /tmp/ana-channel-test-mirror.log</pre></li>
+      <li>수동 curl 응답과 미러가 겹치면 같은 내용이 두 번 보인다 — 미러가 살아 있으면 세션은 그냥 평소처럼 대답만 하면 된다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>수동 점검 명령 모음</summary>
+    <pre># 1. 서버 살아있나
+curl -s localhost:8808/api/health | python3 -m json.tool
+
+# 2. 인박스에 쌓이나 (브리지 없이)
+curl -s -X POST localhost:8808/api/chat -H 'content-type: application/json' -d '{"text":"ping"}'
+curl -s --max-time 3 localhost:8808/api/inbox-wait   # {"messages":[...]} 면 서버 정상
+
+# 3. 피드 확인 (응답이 서버까지는 왔나)
+curl -s "localhost:8808/api/feed?since=0" | python3 -m json.tool
+
+# 4. 에이전트 응답 경로 수동 테스트
+curl -s -X POST localhost:8808/api/agent -H 'content-type: application/json' -d '{"text":"수동 응답 테스트"}'</pre>
+  </details>
+
+  <h2>⑤ 이 진단이 커버하는 경로</h2>
+  <pre>[이 페이지] → POST /api/chat → 서버 inbox → (신호등2) fakechat-bridge 롱폴
+    → WS 주입 → (신호등3) fakechat :8787 → MCP 알림 → Claude 세션
+    → CLAUDE.md 역할 규칙 → POST /api/agent → (신호등4) 피드 → 이 페이지</pre>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

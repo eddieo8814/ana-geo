@@ -241,6 +241,8 @@ function layerRow(entry) {
   const span = document.createElement('span'); span.textContent = entry.label || entry.id;
   const cnt = document.createElement('span'); cnt.className = 'count'; cnt.textContent = entry.featureCount ?? '';
   row.append(cb, sw, span, cnt);
+  row.style.cursor = 'pointer';
+  row.addEventListener('click', (e) => { if (e.target !== cb) cb.click(); }); // 행 전체가 터치 타깃 (>=44px 가이드)
   return row;
 }
 

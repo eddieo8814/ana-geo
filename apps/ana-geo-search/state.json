@@ -18,6 +18,17 @@
   "markers": [],
   "layers": [],
   "selection": null,
-  "analysis": null,
+  "analysis": {
+    "target": "cafe",
+    "operator": "AND",
+    "conditions": [
+      {
+        "relation": "within_distance",
+        "reference": "university",
+        "distance": 2000,
+        "unit": "m"
+      }
+    ]
+  },
   "provenance": []
 }

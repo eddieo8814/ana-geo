@@ -17,6 +17,27 @@ Requires **Node.js >= 20 LTS**. Zero npm dependencies (Leaflet is vendored in `v
 
 To act as ANA, run a coding agent (e.g. Claude Code) in this directory; it receives user messages from `relay.js` output (or `data/inbox.log`), edits `state.json` / the app code, and replies with `POST /api/agent`.
 
+### Wiring a live Claude Code session via fakechat (recommended)
+
+`relay.js` only prints inbound messages — nothing answers until a brain is attached. With the [fakechat channel plugin](https://github.com/tykimos/agent-native-agent) a separate Claude Code session receives dashboard chat as push events:
+
+```bash
+# 1. app server
+node server.js                       # :8801
+
+# 2. brain — a separate Claude Code session started WITH the fakechat channel
+#    (once: claude plugin install fakechat@claude-plugins-official)
+cd apps/ana-geo-map && claude --channels plugin:fakechat@claude-plugins-official
+#    channels attach at session start only — restart the session if you forgot the flag
+
+# 3. bridge — dashboard inbox → fakechat WS (:8787) → session
+node fakechat-bridge.js              # instead of relay.js
+```
+
+Tell the brain session once: *"You are ANA for this app. For every `<channel source="fakechat">` message: read `state.json`, do what was asked (edit state via `PUT /api/state`, or propose code changes), and always reply with `POST http://localhost:8801/api/agent` — never only in the channel."*
+
+Diagnosis when chat gets no reply: inject straight into the channel, bypassing the bridge — `curl -s -X POST localhost:8787/ -F 'id=diag-1' -F 'text=ping'` (expect 204). If the session sees it, the bridge/app side is at fault; if not, the session wasn't started with the channel — restart it with `--channels`.
+
 ## Dependencies
 
 - Node.js >= 20 LTS (global `fetch`)

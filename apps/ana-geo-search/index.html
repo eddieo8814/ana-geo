@@ -1,105 +1,180 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-search</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --ok:#22c55e; --ref:#f59e0b; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:330px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
-  #panel h2:first-child { margin-top:0; }
-  .layer-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
-  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; }
-  .layer-row .dot { width:9px; height:9px; border-radius:50%; flex:none; }
-  #map { flex:1; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:20px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #s-query { color:var(--accent); }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  button { padding:7px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; }
-  button:hover { border-color:var(--accent); }
-  button.primary { background:#0ea5e922; border-color:var(--accent); }
-  select, input[type="number"], input[type="text"] { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 6px; font-size:13px; }
-  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; }
-  #notice { color:var(--dim); font-size:12px; margin-top:6px; }
-  input[type="file"] { display:none; }
-  label.btn { padding:6px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-block; font-size:13px; }
-  .cond { border:1px solid var(--line); border-radius:8px; padding:8px; margin-bottom:8px; background:#0f172a66; }
-  .cond .line { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
-  .cond .line:last-child { margin-bottom:0; }
-  .cond select, .cond input { flex:1; min-width:0; }
-  .cond .drop { flex:none; padding:2px 8px; }
-  .row { display:flex; gap:6px; align-items:center; }
-  .row > * { flex:1; }
-  .row > .fixed { flex:none; }
-  .hint { color:var(--dim); font-size:12px; margin-top:4px; }
-  .explain { color:var(--dim); font-size:12px; margin-top:6px; }
-  .explain div { padding:1px 0; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 300px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; flex: none; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text-weak); margin: 0 0 8px; }
+  #map { flex: 1; min-width: 0; }
+
+  /* 폼 컨트롤 */
+  select, input[type="number"], input[type="text"] {
+    min-height: 40px; padding: 8px 10px; border-radius: var(--r-xs);
+    border: 1.5px solid var(--line); background: var(--surface-2); color: var(--text);
+    font-size: 13.5px; font-weight: 600; outline: none; transition: border-color .12s ease;
+  }
+  select:focus, input:focus { border-color: var(--blue); background: var(--surface); }
+  input[type="file"] { display: none; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 14px;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
+         transition: transform .08s ease, background .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--sh-fab); }
+  .btn.primary:hover { background: var(--blue-700); border-color: var(--blue-700); color: #fff; }
+
+  /* 행 배치 유틸 — JS가 .fixed 를 붙이므로 어휘 유지 */
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; min-width: 0; }
+  .row > .fixed { flex: none; }
+  .hint { color: var(--text-sub); font-size: 12px; font-weight: 500; margin-top: 6px; }
+
+  /* 조건 편집기 (앱 고유 UI) */
+  #conditions { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+  .cond { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 8px; }
+  .cond .line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .cond .line + .line { margin-top: 6px; }
+  .cond .line > select, .cond .line > input { flex: 1; min-width: 0; }
+  /* 관계 셀렉트는 한 줄을 다 쓴다 — 좁은 패널에서 within 과 within_distance 가
+     잘려서 구분되지 않는 것을 막는다. 참조 셀렉트와 삭제 버튼이 다음 줄로 감싼다. */
+  .cond .line > select:first-child { flex: 1 0 100%; }
+  .cond .line > select:last-child { flex: 0 0 88px; }   /* 단위(m/km) 셀렉트만 좁게 */
+  .cond .line .fixed { flex: none; font-size: 12px; font-weight: 700; color: var(--text-weak); }
+  .cond .line > input[type="number"] { font-weight: 800; color: var(--blue); letter-spacing: -0.03em; }
+  .cond .drop { flex: none; width: 44px; height: 44px; border-radius: 50%; background: transparent;
+                border: 1px solid var(--line); color: var(--text-weak); font-size: 17px; font-weight: 800;
+                display: inline-flex; align-items: center; justify-content: center;
+                transition: transform .08s ease, background .12s ease; }
+  .cond .drop:hover { background: var(--warm-bg); border-color: var(--warm-fg); color: var(--warm-fg); }
+  .cond .drop:active { transform: scale(.9); }
+
+  /* 결과 설명 (§23.3) */
+  #explain { margin-top: 10px; font-size: 12px; color: var(--text-sub); font-weight: 600; }
+  #explain div { padding: 2px 0; }
+  #explain div:first-child { color: var(--text); font-weight: 800; letter-spacing: -0.02em; }
+
+  /* 레이어 목록 */
+  .layer-row { display: flex; align-items: center; gap: 8px; min-height: 32px; font-weight: 600; font-size: 13.5px; }
+  .layer-row input[type="checkbox"] { width: 17px; height: 17px; flex: none; accent-color: var(--blue); }
+  .layer-row .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .layer-row .count { margin-left: auto; font-weight: 800; color: var(--blue); font-size: 13px; letter-spacing: -0.02em; }
+  #notice { color: var(--text-weak); font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+  /* 상태 바 — 조건 요약과 결과 수는 항상 보인다 (§23.2) */
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--bg);
+               border-top: 1px solid var(--line-2); overflow: hidden; }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px;
+                     font-size: 12.5px; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+  #statusbar .pill.query { min-width: 0; }
+  #s-query { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; display: inline-block;
+             vertical-align: bottom; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 152px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  #err { color: var(--warm-fg); padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; font-weight: 500; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 60%; width: min(300px, 86vw); }
+    .msg { max-width: 86%; }
+    #s-query { max-width: 34vw; }
+  }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); box-shadow: var(--sh-card); }
+  .leaflet-popup-content-wrapper { border-radius: var(--r-sm); }
+  .leaflet-popup-content { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 14px; }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--text-weak); }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-search</h1>
-    <span class="q">What satisfies these spatial conditions?</span>
+    <span class="pill badge-cool q">What satisfies these conditions?</span>
+    <span class="pill badge-warm q" style="margin-left:auto">Agent-Native GIS</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Features</h2>
-      <div class="row">
-        <select id="acq-category"></select>
-        <button id="acq-btn" class="fixed">Acquire</button>
+      <div class="card">
+        <h2>Features</h2>
+        <div class="row">
+          <select id="acq-category" aria-label="획득할 카테고리"></select>
+          <button class="btn fixed" id="acq-btn" aria-label="현재 지도 범위에서 카테고리 획득">획득</button>
+        </div>
+        <div class="hint">현재 지도 범위 안에서 Overpass로 카테고리를 가져옵니다 (FR-SEARCH-011).</div>
+        <label class="btn" for="geofile" role="button" tabindex="0" aria-label="GeoJSON 파일 불러오기"
+               style="margin-top:10px">📂 Load GeoJSON…</label>
+        <input type="file" id="geofile" accept=".json,.geojson" />
       </div>
-      <div class="hint">Fetches the category from Overpass inside the current map view (FR-SEARCH-011).</div>
-      <label class="btn" for="geofile" style="margin-top:8px">Load GeoJSON…</label>
-      <input type="file" id="geofile" accept=".json,.geojson" />
 
-      <h2>Query</h2>
-      <div class="row">
-        <span class="fixed" style="color:var(--dim)">Find</span>
-        <select id="q-target"></select>
-        <select id="q-operator" class="fixed">
-          <option value="AND">AND</option>
-          <option value="OR">OR</option>
-        </select>
+      <div class="card">
+        <h2>Query</h2>
+        <div class="row">
+          <span class="fixed hint" style="margin-top:0">Find</span>
+          <select id="q-target" aria-label="검색 대상 카테고리"></select>
+          <select id="q-operator" class="fixed" aria-label="조건 결합 방식" style="flex:0 0 84px">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+          </select>
+        </div>
+        <div id="conditions"></div>
+        <div class="row">
+          <button class="btn" id="add-cond" aria-label="조건 추가">+ 조건</button>
+          <button class="btn primary" id="run" aria-label="검색 실행">검색 실행</button>
+        </div>
+        <div id="explain"></div>
       </div>
-      <div id="conditions" style="margin-top:8px"></div>
-      <div class="row">
-        <button id="add-cond">+ Condition</button>
-        <button id="run" class="primary">Run search</button>
-      </div>
-      <div id="explain" class="explain"></div>
 
-      <h2>Layers</h2>
-      <div id="layers"></div>
-      <div id="notice"></div>
+      <div class="card">
+        <h2>Layers</h2>
+        <div id="layers"></div>
+        <div id="notice"></div>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
-    <span>Results <b id="s-count">–</b></span>
-    <span>Query <b id="s-query">–</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
+    <span class="pill">Results<b id="s-count">–</b></span>
+    <span class="pill query">Query<b id="s-query">–</b></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find cafes within 2 km of universities."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Find cafes within 2 km of universities."'
+             autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>

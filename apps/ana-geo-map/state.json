@@ -3,26 +3,50 @@
     "name": "ana-geo-map",
     "version": "0.1.0"
   },
-  "stateVersion": 18,
   "map": {
     "view": {
       "center": [
-        36.3504,
-        127.3845
+        37.5665,
+        126.978
       ],
       "zoom": 13
     },
     "observedView": {
       "center": [
-        36.35127735625687,
-        127.37209796905519
+        37.5665,
+        126.978
       ],
-      "zoom": 15
+      "zoom": 13
     },
     "baseLayer": "osm"
   },
-  "markers": [],
-  "layers": [],
+  "markers": [
+    {
+      "id": "marker-1786402728031",
+      "lat": 36.34554959127678,
+      "lng": 127.31025695800783,
+      "createdAt": "2026-08-10T22:58:48.031Z"
+    }
+  ],
+  "layers": [
+    {
+      "id": "circle-busan",
+      "type": "geojson",
+      "label": "부산 원 (반경 3km)",
+      "source": "agent",
+      "visible": true,
+      "featureCount": 1,
+      "resultRef": "/api/results/circle-busan",
+      "resultVersion": 1,
+      "bbox": [
+        129.042628,
+        35.152651,
+        129.108572,
+        35.206549
+      ]
+    }
+  ],
   "selection": null,
-  "analysis": null
+  "analysis": null,
+  "stateVersion": 44
 }

@@ -1,127 +1,200 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181C" media="(prefers-color-scheme: dark)" />
 <title>ana-geo-satellite-change-detection</title>
+<link rel="stylesheet" href="/vendor/ana/tokens.css" />
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
-  :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --text:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; }
-  * { box-sizing:border-box; margin:0; }
-  body { font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
-  header h1 { font-size:16px; } header .q { color:var(--dim); font-size:13px; }
-  main { flex:1; display:flex; min-height:0; }
-  #panel { width:330px; border-right:1px solid var(--line); padding:12px; overflow:auto; background:var(--panel); }
-  #panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:14px 0 6px; }
-  #panel h2:first-child { margin-top:0; }
-  .field { display:flex; align-items:center; gap:8px; padding:2px 0; }
-  .field label { width:96px; color:var(--dim); flex:none; font-size:13px; }
-  .field input, .field select { flex:1; min-width:0; padding:5px 7px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
-  .field input[type=range] { padding:0; }
-  button { padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); cursor:pointer; font:inherit; }
-  button:hover { border-color:var(--accent); }
-  button[disabled] { opacity:.55; cursor:progress; }
-  .wide { width:100%; margin-top:8px; }
-  #searchbtn { background:#0ea5e91f; border-color:#0ea5e955; }
-  #runbtn { background:#22c55e1f; border-color:#22c55e55; }
-  /* A search can return 40 scenes; the list scrolls inside itself so the
-     analysis controls and the result stay on screen with it. */
-  #scenes { max-height:200px; overflow:auto; }
-  .scene { border:1px solid var(--line); border-radius:8px; padding:6px 8px; margin-bottom:6px; font-size:13px; cursor:pointer; }
-  .scene:hover { border-color:var(--accent); }
-  .scene.before { border-color:#a78bfa; background:#a78bfa14; }
-  .scene.after { border-color:#38bdf8; background:#38bdf814; }
-  .scene.disabled { opacity:.45; }
-  .scene .sid { font-weight:600; word-break:break-all; }
-  .scene .meta { color:var(--dim); display:flex; gap:10px; flex-wrap:wrap; }
-  .scene .pick { display:flex; gap:6px; margin-top:4px; }
-  .scene .pick button { padding:2px 8px; font-size:12px; border-radius:6px; }
-  /* Before and after sit side by side: the pair is one decision, and the
-     vertical space belongs to the scene list and the result. */
-  #slots { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
-  .slot { border:1px solid var(--line); border-radius:8px; padding:5px 7px; font-size:12px; min-width:0; }
-  .slot .sid { font-size:12px; overflow-wrap:anywhere; }
-  .slot .role { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
-  .slot.filled.before { border-color:#a78bfa; } .slot.filled.after { border-color:#38bdf8; }
-  table.kv { border-collapse:collapse; width:100%; font-size:13px; }
-  table.kv td { padding:1px 0; vertical-align:top; word-break:break-word; }
-  table.kv td:first-child { color:var(--dim); padding-right:8px; white-space:nowrap; width:96px; }
-  #explain { margin:6px 0; padding:6px 8px; border-left:3px solid var(--accent); background:#38bdf814; font-size:13px; }
-  .region-row { display:flex; align-items:center; gap:8px; padding:2px 0; font-size:13px; cursor:pointer; }
-  .region-row:hover { color:var(--accent); }
-  .region-row .rank { color:var(--dim); width:22px; font-variant-numeric:tabular-nums; }
-  .region-row .dot { width:9px; height:9px; border-radius:50%; flex:none; }
-  .region-row .area { margin-left:auto; font-variant-numeric:tabular-nums; }
-  .layer-row { display:flex; align-items:center; gap:8px; padding:3px 0; }
-  .layer-row .count { margin-left:auto; color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; }
-  #map { flex:1; }
-  #statusbar { padding:6px 16px; border-top:1px solid var(--line); display:flex; gap:24px; color:var(--dim); font-size:13px; flex-wrap:wrap; }
-  #statusbar b { color:var(--text); font-weight:600; }
-  #converse { border-top:1px solid var(--line); background:var(--panel); }
-  #feed { max-height:150px; overflow:auto; padding:8px 16px; display:flex; flex-direction:column; gap:6px; }
-  .msg { padding:6px 10px; border-radius:8px; max-width:70%; font-size:13px; }
-  .msg.user { align-self:flex-end; background:#0ea5e91f; border:1px solid #0ea5e955; }
-  .msg.agent { align-self:flex-start; background:#33415577; border:1px solid var(--line); }
-  #chatform { display:flex; gap:8px; padding:8px 16px 12px; }
-  #chatinput { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
-  #err { color:#f87171; padding:0 16px 6px; font-size:13px; min-height:1em; white-space:pre-wrap; }
-  #err.warn { color:#fbbf24; }
-  .hint { color:var(--dim); font-size:12px; }
-  .leaflet-popup-content { font:13px/1.45 system-ui,sans-serif; }
+  /* ── 골격: 글래스 헤더 / 메인 / 상태 바 / Converse — 토큰만 참조 ── */
+  body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+  header.glass-header { height: var(--header-h); display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .q { font-size: 12px; padding: 5px 11px; }
+
+  main { flex: 1; display: flex; min-height: 0; background: var(--bg); }
+  #panel { width: 300px; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 10px; flex: none; }
+  .card { padding: 14px; }
+  #panel h2 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text-weak); margin: 0 0 8px; }
+  .card + .card { margin: 0; }
+
+  /* form fields — label + control row, 44px+ 타깃 */
+  .field { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .field label { width: 84px; flex: none; color: var(--text-sub); font-size: 13px; font-weight: 600; }
+  .field input, .field select {
+    flex: 1; min-width: 0; min-height: 36px; padding: 7px 10px; border-radius: var(--r-sm);
+    border: 1.5px solid var(--line); background: var(--surface-2); color: var(--text);
+    font: inherit; font-size: 13px; outline: none; transition: border-color .12s ease, background .12s ease;
+  }
+  .field input:focus, .field select:focus { border-color: var(--blue); background: var(--surface); }
+  .field input[type="range"] { padding: 0; accent-color: var(--blue); min-height: 20px; }
+  .field b { font-weight: 800; color: var(--blue); letter-spacing: -0.02em; font-size: 13px; flex: none; min-width: 34px; text-align: right; }
+  .field .hint { flex: none; }
+
+  /* 버튼: 알약 + 프레스 피드백, 터치 타깃 44px */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; width: 100%;
+         border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+         font-size: 13.5px; font-weight: 800; color: var(--text); cursor: pointer; margin-top: 8px;
+         transition: transform .08s ease, background .12s ease; }
+  .btn:hover { background: var(--blue-weak); border-color: var(--blue); color: var(--blue-700); }
+  .btn:active { transform: scale(.96); }
+  .btn[disabled] { opacity: .5; cursor: progress; }
+  #searchbtn { background: var(--cool-bg); border-color: var(--cool-bg); color: var(--cool-fg); }
+  #runbtn { background: var(--blue-weak); border-color: var(--blue-weak); color: var(--blue-700); }
+
+  .hint { color: var(--text-weak); font-size: 12px; margin-top: 4px; }
+
+  /* before/after slots */
+  #slots { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .slot { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 9px; font-size: 12px; min-width: 0; background: var(--surface-2); }
+  .slot .sid { font-size: 11.5px; overflow-wrap: anywhere; font-weight: 700; }
+  .slot .role { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-weak); font-weight: 800; }
+  .slot.filled.before { border-color: var(--c-4); }
+  .slot.filled.after { border-color: var(--blue); }
+  .slot .meta.hint { margin-top: 2px; }
+  .slot button {
+    margin-top: 6px; padding: 4px 10px; font-size: 11.5px; font-weight: 700; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text-sub);
+    min-height: 26px; transition: transform .08s ease, background .12s ease;
+  }
+  .slot button:hover { border-color: var(--blue); color: var(--blue-700); background: var(--blue-weak); }
+  .slot button:active { transform: scale(.94); }
+
+  /* scene search results — scrolls inside itself so controls stay visible */
+  #scenes { max-height: 220px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+  .scene { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 10px; font-size: 12.5px; cursor: pointer; background: var(--surface-2); transition: border-color .12s ease; }
+  .scene:hover { border-color: var(--blue); }
+  .scene.before { border-color: var(--c-4); background: color-mix(in srgb, var(--c-4) 10%, var(--surface)); }
+  .scene.after { border-color: var(--blue); background: var(--blue-weak); }
+  .scene.disabled { opacity: .45; }
+  .scene .sid { font-weight: 700; word-break: break-all; }
+  .scene .meta { color: var(--text-weak); display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+  .scene .pick { display: flex; gap: 6px; margin-top: 6px; }
+  .scene .pick button {
+    padding: 4px 10px; font-size: 11.5px; font-weight: 700; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text-sub); min-height: 26px;
+    transition: transform .08s ease, background .12s ease;
+  }
+  .scene .pick button:hover:not([disabled]) { border-color: var(--blue); color: var(--blue-700); background: var(--blue-weak); }
+  .scene .pick button:active:not([disabled]) { transform: scale(.94); }
+  .scene .pick button[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* result */
+  #explain { margin: 6px 0; padding: 10px 12px; border-left: 3px solid var(--blue); background: var(--blue-weak); border-radius: var(--r-xs); font-size: 13px; font-weight: 600; color: var(--text); }
+  table.kv { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.kv td { padding: 3px 0; vertical-align: top; word-break: break-word; }
+  table.kv td:first-child { color: var(--text-weak); padding-right: 8px; white-space: nowrap; width: 96px; font-weight: 600; }
+  table.kv td:last-child { font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
+
+  .region-row { display: flex; align-items: center; gap: 8px; padding: 6px 2px; font-size: 13px; cursor: pointer; border-radius: var(--r-xs); min-height: 32px; transition: background .1s ease; }
+  .region-row:hover { background: var(--surface-2); }
+  .region-row .rank { color: var(--text-weak); width: 22px; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .region-row .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .region-row .area { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
+
+  /* layers */
+  .layer-row { display: flex; align-items: center; gap: 8px; min-height: 32px; font-weight: 600; font-size: 13px; }
+  .layer-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--blue); }
+  .layer-row .count { margin-left: auto; font-weight: 800; color: var(--blue); font-size: 12.5px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+  #map { flex: 1; min-width: 0; }
+
+  #statusbar { display: flex; gap: 8px; align-items: center; padding: 8px 14px; background: var(--bg); border-top: 1px solid var(--line-2); flex-wrap: wrap; }
+  #statusbar .pill { background: var(--surface); box-shadow: var(--sh-card); padding: 6px 12px; font-size: 12.5px; color: var(--text-sub); font-weight: 600; }
+  #statusbar b { color: var(--blue); font-weight: 800; letter-spacing: -0.03em; margin-left: 5px; }
+
+  /* Converse */
+  #converse { background: var(--surface); border-top: 1px solid var(--line-2); padding-bottom: var(--safe-b); }
+  #feed { max-height: 168px; overflow: auto; padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 6px; }
+  .msg { padding: 8px 12px; border-radius: var(--r-sm); max-width: 72%; font-size: 13.5px; font-weight: 500; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--blue-weak); color: var(--blue-700); border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
+  .msg.activity { align-self: flex-start; background: transparent; border: none; color: var(--text-weak);
+                  font: 11px/1.5 ui-monospace, SFMono-Regular, monospace; padding: 0 12px; max-width: 92%; }
+  #err { color: var(--warm-fg); padding: 0 16px; font-size: 12.5px; font-weight: 600; min-height: 1.1em; white-space: pre-wrap; }
+  #err.warn { color: var(--text-sub); }
+  #chatform { display: flex; gap: 8px; align-items: center; padding: 8px 14px 12px; }
+  #chatinput { flex: 1; min-height: 46px; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+               background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; }
+  #chatinput:focus { border-color: var(--blue); background: var(--surface); }
+  #send { width: 48px; height: 48px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 18px;
+          font-weight: 800; box-shadow: var(--sh-fab); flex: none; transition: transform .08s ease; }
+  #send:active { transform: scale(.9); }
+
+  .leaflet-popup-content { font: 13px/1.45 -apple-system, system-ui, sans-serif; }
+
+  @media (max-width: 1023px) {
+    #panel { position: absolute; z-index: 20; height: 60%; width: min(320px, 86vw); }
+    .msg { max-width: 86%; }
+  }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass-header">
     <h1>ana-geo-satellite-change-detection</h1>
-    <span class="q">What changed over time? — Sentinel-2 NDVI difference over the ANA runtime</span>
+    <span class="pill badge-cool q">What changed over time?</span>
+    <span class="pill badge-warm q" style="margin-left:auto">Sentinel-2 NDVI difference</span>
   </header>
   <main>
     <aside id="panel">
-      <h2>Scene search (STAC)</h2>
-      <div class="field"><label for="f-from">From</label><input id="f-from" type="date" /></div>
-      <div class="field"><label for="f-to">To</label><input id="f-to" type="date" /></div>
-      <div class="field"><label for="f-cloud">Max cloud %</label><input id="f-cloud" type="number" min="0" max="100" step="5" /></div>
-      <button id="searchbtn" class="wide">Search scenes in view</button>
-      <div class="hint" id="search-note"></div>
-
-      <h2>Before / after pair</h2>
-      <div id="slots"></div>
-      <div id="scenes"></div>
-
-      <h2>Analysis</h2>
-      <div class="field">
-        <label for="f-threshold">Threshold</label>
-        <input id="f-threshold" type="range" /><b id="f-threshold-val">0.20</b>
+      <div class="card">
+        <h2>Scene search (STAC)</h2>
+        <div class="field"><label for="f-from">From</label><input id="f-from" type="date" /></div>
+        <div class="field"><label for="f-to">To</label><input id="f-to" type="date" /></div>
+        <div class="field"><label for="f-cloud">Max cloud %</label><input id="f-cloud" type="number" min="0" max="100" step="5" /></div>
+        <button id="searchbtn" class="btn" aria-label="현재 화면 영역의 위성 장면 검색">Search scenes in view</button>
+        <div class="hint" id="search-note"></div>
       </div>
-      <div class="field"><label for="f-direction">Change</label><select id="f-direction"></select></div>
-      <div class="field"><label for="f-minarea">Min region</label><input id="f-minarea" type="number" min="0" step="1000" /><span class="hint">m²</span></div>
-      <div class="field"><label for="f-limit">Show top</label><input id="f-limit" type="number" min="1" step="1" placeholder="all" /></div>
-      <button id="runbtn" class="wide">Run change detection</button>
 
-      <h2>Result</h2>
-      <div id="explain">No analysis yet.</div>
-      <table class="kv" id="summary"></table>
-      <div id="regions"></div>
+      <div class="card">
+        <h2>Before / after pair</h2>
+        <div id="slots"></div>
+        <div id="scenes"></div>
+      </div>
 
-      <h2>Layers</h2>
-      <div id="layers"></div>
+      <div class="card">
+        <h2>Analysis</h2>
+        <div class="field">
+          <label for="f-threshold">Threshold</label>
+          <input id="f-threshold" type="range" /><b id="f-threshold-val">0.20</b>
+        </div>
+        <div class="field"><label for="f-direction">Change</label><select id="f-direction"></select></div>
+        <div class="field"><label for="f-minarea">Min region</label><input id="f-minarea" type="number" min="0" step="1000" /><span class="hint">m²</span></div>
+        <div class="field"><label for="f-limit">Show top</label><input id="f-limit" type="number" min="1" step="1" placeholder="all" /></div>
+        <button id="runbtn" class="btn" aria-label="변화 탐지 분석 실행">Run change detection</button>
+      </div>
+
+      <div class="card">
+        <h2>Result</h2>
+        <div id="explain">No analysis yet.</div>
+        <table class="kv" id="summary"></table>
+        <div id="regions"></div>
+      </div>
+
+      <div class="card">
+        <h2>Layers</h2>
+        <div id="layers"></div>
+      </div>
     </aside>
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="지도"></div>
   </main>
   <div id="statusbar">
-    <span>Center <b id="s-center">–</b></span>
-    <span>Zoom <b id="s-zoom">–</b></span>
-    <span>Threshold <b id="s-threshold">–</b></span>
-    <span>Changed area <b id="s-area">–</b></span>
+    <span class="pill">Center<b id="s-center">–</b></span>
+    <span class="pill">Zoom<b id="s-zoom">–</b></span>
+    <span class="pill">Threshold<b id="s-threshold">–</b></span>
+    <span class="pill">Changed area<b id="s-area">–</b></span>
     <span id="s-note"></span>
   </div>
-  <section id="converse">
+  <section id="converse" aria-label="ANA 대화">
     <div id="feed"></div>
-    <div id="err"></div>
+    <div id="err" role="alert"></div>
     <form id="chatform">
-      <input id="chatinput" placeholder='Talk to ANA — e.g. "Compare this image with the one from six months ago."' autocomplete="off" />
-      <button type="submit">Send</button>
+      <input id="chatinput" placeholder='Talk to ANA — e.g. "Compare this image with the one from six months ago."' autocomplete="off" aria-label="ANA에게 메시지" />
+      <button id="send" type="submit" aria-label="전송">↑</button>
     </form>
   </section>
   <script src="/vendor/leaflet/leaflet.js"></script>
