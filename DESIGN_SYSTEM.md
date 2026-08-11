@@ -15,11 +15,15 @@
 
 다크모드는 `@media (prefers-color-scheme: dark)`에서 토큰 재정의로만 처리한다.
 
-## 앱 공통 골격 (3층)
+## 앱 공통 골격
 
-1. **글래스 헤더** — `.glass-header`(sticky + blur), 앱명(800) + 핵심 질문 칩(`.pill.badge-cool`)
-2. **메인** — 좌측 패널은 `.card` 묶음(제목 12px/800/`--text-weak` 대문자), 지도가 주 시각 맥락
-3. **하단 Converse** — 피드(말풍선) + 입력 바: 알약 입력(44px+) + **48px 원형 전송 버튼**(`--blue`, 프레스 `scale(.9)`)
+1. **글래스 헤더** — `.glass-header`(sticky + blur): **ANA 로고**(`vendor/ana/ana-logo.png`, 28px, radius 8) + `ANA`(800) + **앱명에서 "ana-" 접두 제거한 이름**(600, `--text-sub`) + 핵심 질문 칩(`.pill.badge-cool`)
+2. **메인 3열** — 좌측 패널(`.card` 묶음, 제목 12px/800/`--text-weak` 대문자) | 지도(주 시각 맥락) | **우측 Converse 사이드바**
+3. **Converse 사이드바(우측, 기본 320px, 조절 가능)** — 지도와 사이드바 사이 5px `#resizer`(col-resize, hover 시 `--blue-weak`)를 드래그해 260–560px 범위에서 폭 조절, `localStorage('ana.converse.width')`에 기기별로 기억(공유 상태 아님 — §8.2-3의 서버 저장 규칙은 공유 데이터용). 구성: 피드(flex:1) → 에러 줄 → **선택 컨텍스트 칩 행** → 입력 바(알약 입력 44px+ + 48px 원형 전송 `--blue`). 폭 변경 시 지도가 있으면 `map.invalidateSize()`. 모바일(<1024px)에서는 resizer 숨기고 하단 38dvh 스트립으로 전환
+
+## 선택 컨텍스트 칩 (§24.1)
+
+frontend 요소(마커·POI·피처·후보·장면·변화 영역 등)를 클릭하면 채팅 입력 위에 **칩**으로 등록된다(`--cool-bg`/`--cool-fg` 알약, ✕ 제거 버튼). 전송 시 ① 메시지 끝에 `[선택 컨텍스트: …]` 줄로 첨부되고 ② `state.selection = { chips:[구조화된 ref], at }`로 저장돼 ANA가 정확한 대상을 참조한다. 전송 후 칩은 비워진다.
 
 ## 말풍선 규칙
 

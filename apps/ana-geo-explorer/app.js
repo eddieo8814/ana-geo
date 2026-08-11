@@ -17,6 +17,26 @@ const $ = (id) => document.getElementById(id);
 const err = (m) => { $('err').textContent = m || ''; $('err').className = ''; };        // §25
 const warn = (m) => { $('err').textContent = m || ''; $('err').className = m ? 'warn' : ''; };
 
+// ---------- 선택 컨텍스트 칩 — frontend 요소 선택 시 등록 (§24.1) ----------
+const chips = new Map(); // key -> { label, ref }
+
+function addChip(key, label, ref) { chips.set(key, { label, ref }); renderChips(); }
+
+function renderChips() {
+  const box = $('chips');
+  box.innerHTML = '';
+  for (const [key, c] of chips) {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    const span = document.createElement('span'); span.textContent = c.label;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+    x.setAttribute('aria-label', `${c.label} 칩 제거`);
+    x.addEventListener('click', () => { chips.delete(key); renderChips(); });
+    el.append(span, x);
+    box.appendChild(el);
+  }
+}
+
 // ---------- state I/O ----------
 
 async function fetchState() {
@@ -189,7 +209,10 @@ function buildLeafletLayer(gj, color) {
     onEachFeature: (f, layer) => {
       const p = f.properties || {};
       layer.bindPopup(`<b>${escapeHtml(p.name || '(unnamed)')}</b><br>${escapeHtml(p.category || '')}`);
-      layer.on('click', () => selectFeature(f)); // FR-EXP-005
+      layer.on('click', () => {
+        selectFeature(f); // FR-EXP-005
+        addChip(`poi:${p.sourceId}:${p.name}`, `📍 ${p.name || '(unnamed)'}`, { type: 'poi', layer: p.category, name: p.name, sourceId: p.sourceId });
+      });
     },
   });
 }
@@ -322,9 +345,16 @@ function setupEvents() {
 
   $('chatform').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = $('chatinput').value.trim();
+    let text = $('chatinput').value.trim();
     if (!text) return;
     $('chatinput').value = '';
+    if (chips.size) {
+      // 칩을 메시지에 첨부 + state.selection에 구조화 저장 (§24.1 — ANA가 정확한 대상 참조)
+      const list = [...chips.values()];
+      await saveState((s) => { s.selection = { chips: list.map((c) => c.ref), at: new Date().toISOString() }; });
+      text += `\n[선택 컨텍스트: ${list.map((c) => c.label).join(', ')}]`;
+      chips.clear(); renderChips();
+    }
     const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
     if (!r.ok) err('failed to send message');
   });
@@ -356,6 +386,32 @@ async function poll() {
   } catch (e) { err(`sync lost: ${e}`); }
 }
 
+// ---------- 사이드바 크기 조절 (기기별 UI 선호 — localStorage, 공유 상태 아님) ----------
+
+function initResizer() {
+  const rz = $('resizer'), conv = $('converse');
+  if (!rz || !conv) return;
+  const saved = Number(localStorage.getItem('ana.converse.width'));
+  if (saved >= 260 && saved <= 560) conv.style.width = `${saved}px`;
+  let drag = null;
+  rz.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, w: conv.offsetWidth };
+    rz.setPointerCapture(e.pointerId);
+    rz.classList.add('active');
+  });
+  rz.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    conv.style.width = `${Math.min(560, Math.max(260, drag.w - (e.clientX - drag.x)))}px`;
+    map && map.invalidateSize();
+  });
+  rz.addEventListener('pointerup', () => {
+    if (!drag) return;
+    drag = null;
+    rz.classList.remove('active');
+    localStorage.setItem('ana.converse.width', conv.offsetWidth);
+  });
+}
+
 // ---------- boot ----------
 
 (async function main() {
@@ -369,5 +425,6 @@ async function poll() {
   }).addTo(map);
   renderAll();
   setupEvents();
+  initResizer();
   setInterval(poll, 2500);
 })();

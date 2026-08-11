@@ -244,7 +244,10 @@ function renderRanking() {
   const box = $('ranking');
   const rk = state.analysis && state.analysis.ranking;
   if (!rk) { box.innerHTML = ''; return; }
-  const items = rk.top.map((c) => `<li>${c.name || c.id}
+  // 이름 없는 OSM 피처가 흔해서 라벨은 name → id → 순위 순으로 떨어진다.
+  const labelOf = (c, i) => c.name || c.id || `#${i + 1}`;
+  const items = rk.top.map((c, i) => `<li data-idx="${i}" role="button" tabindex="0"
+      aria-label="${labelOf(c, i)} 선택 컨텍스트로 추가">${labelOf(c, i)}
       <span class="cost">— ${fmtMin(c.travelTimeSeconds)} / ${fmtKm(c.distanceMeters)}</span></li>`).join('');
   box.innerHTML = card(`
     <div class="hint">Ranked by network ${rk.rankedBy === 'time' ? 'travel time' : 'distance'} —
@@ -252,6 +255,20 @@ function renderRanking() {
     <ol class="ranking">${items}</ol>
     ${rk.truncated ? `<div class="hint">Only the first ${rk.candidatesConsidered} candidates were routed — narrow the radius to rank the rest.</div>` : ''}
   `);
+  // 후보 행 클릭 → 칩 (§24.1). li는 매 렌더마다 새로 만들어지므로 리스너가 누적되지 않고,
+  // 커서·호버는 CSS(ol.ranking li[data-idx])가 맡는다 — JS에서 스타일을 박지 않는다.
+  box.querySelectorAll('ol.ranking li[data-idx]').forEach((li, i) => {
+    const c = rk.top[i];
+    if (!c) return;
+    const pick = () => addChip(`destination:${c.id || i}`, `🎯 ${labelOf(c, i)}`,
+      { type: 'destination', id: c.id ?? null, name: c.name || c.id || null, rank: c.rank ?? i + 1 });
+    li.addEventListener('click', pick);
+    li.addEventListener('keydown', (e) => { // role="button"이면 키보드로도 눌려야 한다
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      pick();
+    });
+  });
 }
 
 function renderIsochrone() {
@@ -420,6 +437,7 @@ function setupEvents() {
   map.on('click', async (e) => {
     const point = { lat: e.latlng.lat, lng: e.latlng.lng };
     await patchAnalysis({ [clickTarget]: point });
+    addChip(`route:${clickTarget}`, `${clickTarget === 'origin' ? '🚩 origin' : '🏁 destination'} ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`, { type: clickTarget, ...point }); // 선택 → 칩 (§24.1)
     if (clickTarget === 'origin') setClickTarget('destination'); // natural second click
   });
 
@@ -458,9 +476,17 @@ function setupEvents() {
 
   $('chatform').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = $('chatinput').value.trim();
+    let text = $('chatinput').value.trim();
     if (!text) return;
     $('chatinput').value = '';
+    if (chips.size) {
+      // 칩을 메시지에 첨부 + state.selection에 병합 저장 (§24.1)
+      const list = [...chips.values()];
+      await writeSelectionChips(list);
+      text += `
+[선택 컨텍스트: ${list.map((c) => c.label).join(', ')}]`;
+      chips.clear(); renderChips();
+    }
     const r = await fetch('/api/chat', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }),
     });
@@ -543,3 +569,62 @@ async function showWorkerStatus() {
   showWorkerStatus();
   setInterval(poll, 2500);
 })();
+
+
+// ---------- 선택 컨텍스트 칩 — frontend 요소 선택 시 등록 (§24.1) ----------
+const chips = new Map(); // key -> { label, ref }
+
+function addChip(key, label, ref) { chips.set(key, { label, ref }); renderChips(); }
+
+function renderChips() {
+  const box = document.getElementById('chips');
+  if (!box) return;
+  box.innerHTML = '';
+  for (const [key, c] of chips) {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    const span = document.createElement('span'); span.textContent = c.label;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+    x.setAttribute('aria-label', `${c.label} 칩 제거`);
+    x.addEventListener('click', () => { chips.delete(key); renderChips(); });
+    el.append(span, x);
+    box.appendChild(el);
+  }
+}
+
+// 칩을 state.selection에 병합 저장 — 기존 selection 필드(activeScene 등)는 보존 (§24.1)
+async function writeSelectionChips(list) {
+  try {
+    const r = await fetch('/api/state');
+    const s = await r.json();
+    const prev = s.selection && typeof s.selection === 'object' ? s.selection : {};
+    s.selection = { ...prev, chips: list.map((c) => c.ref), at: new Date().toISOString() };
+    await fetch('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(s) });
+  } catch { /* 저장 실패해도 메시지 첨부는 진행 */ }
+}
+
+// ---------- 사이드바 크기 조절 (기기별 UI 선호 — localStorage) ----------
+function initResizer() {
+  const rz = document.getElementById('resizer'), conv = document.getElementById('converse');
+  if (!rz || !conv) return;
+  const saved = Number(localStorage.getItem('ana.converse.width'));
+  if (saved >= 260 && saved <= 560) conv.style.width = `${saved}px`;
+  let drag = null;
+  rz.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, w: conv.offsetWidth };
+    rz.setPointerCapture(e.pointerId);
+    rz.classList.add('active');
+  });
+  rz.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    conv.style.width = `${Math.min(560, Math.max(260, drag.w - (e.clientX - drag.x)))}px`;
+    if (typeof map !== 'undefined' && map && map.invalidateSize) map.invalidateSize();
+  });
+  rz.addEventListener('pointerup', () => {
+    if (!drag) return;
+    drag = null;
+    rz.classList.remove('active');
+    localStorage.setItem('ana.converse.width', conv.offsetWidth);
+  });
+}
+initResizer();

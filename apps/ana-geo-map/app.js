@@ -11,6 +11,28 @@ let saving = Promise.resolve();
 const $ = (id) => document.getElementById(id);
 const err = (m) => { $('err').textContent = m || ''; }; // §25 — errors on the Watch surface
 
+// ---------- 선택 컨텍스트 칩 — frontend 요소 선택 시 등록 (§24.1) ----------
+// 지도의 마커/피처를 클릭하면 칩으로 쌓이고, 전송 시 메시지에 [선택 컨텍스트]로 첨부되며
+// state.selection에도 구조화되어 저장돼 ANA가 정확한 대상을 읽을 수 있다.
+const chips = new Map(); // key -> { label, ref }
+
+function addChip(key, label, ref) { chips.set(key, { label, ref }); renderChips(); }
+
+function renderChips() {
+  const box = $('chips');
+  box.innerHTML = '';
+  for (const [key, c] of chips) {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    const span = document.createElement('span'); span.textContent = c.label;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+    x.setAttribute('aria-label', `${c.label} 칩 제거`);
+    x.addEventListener('click', () => { chips.delete(key); renderChips(); });
+    el.append(span, x);
+    box.appendChild(el);
+  }
+}
+
 // ---------- state I/O ----------
 
 async function fetchState() {
@@ -42,7 +64,10 @@ function applyView() {
 
 function renderMarkers() {
   markerGroup.clearLayers();
-  for (const m of state.markers) L.marker([m.lat, m.lng]).addTo(markerGroup);
+  for (const m of state.markers) {
+    L.marker([m.lat, m.lng]).addTo(markerGroup)
+      .on('click', () => addChip(`marker:${m.id}`, `📍 ${m.id}`, { type: 'marker', id: m.id, lat: m.lat, lng: m.lng }));
+  }
   $('markerinfo').textContent = state.markers.length
     ? `${state.markers.length} marker(s) in state.json`
     : 'Click the map to add a marker.';
@@ -63,7 +88,13 @@ async function renderLayers() {
         if (!r.ok) throw new Error(`${r.status}`);
         const gj = await r.json();
         if (geoLayers.has(entry.id)) map.removeLayer(geoLayers.get(entry.id).layer);
-        const layer = L.geoJSON(gj, { style: { color: '#38bdf8', weight: 2 } });
+        const layer = L.geoJSON(gj, {
+          style: { color: '#3182F6', weight: 2 },
+          onEachFeature: (f, lyr) => lyr.on('click', () => {
+            const name = (f.properties && (f.properties.name || f.properties.id)) || f.id || entry.id;
+            addChip(`feature:${entry.id}:${name}`, `⬠ ${name}`, { type: 'feature', layer: entry.id, name, featureId: f.id ?? null });
+          }),
+        });
         geoLayers.set(entry.id, { layer, resultVersion: entry.resultVersion });
       } catch (e) { err(`failed to load layer ${entry.id}: ${e}`); continue; }
     }
@@ -153,9 +184,16 @@ function setupEvents() {
 
   $('chatform').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = $('chatinput').value.trim();
+    let text = $('chatinput').value.trim();
     if (!text) return;
     $('chatinput').value = '';
+    if (chips.size) {
+      // 칩을 메시지에 첨부 + state.selection에 구조화 저장 (§24.1 — ANA가 정확한 대상 참조)
+      const list = [...chips.values()];
+      await saveState((s) => { s.selection = { chips: list.map((c) => c.ref), at: new Date().toISOString() }; });
+      text += `\n[선택 컨텍스트: ${list.map((c) => c.label).join(', ')}]`;
+      chips.clear(); renderChips();
+    }
     const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
     if (!r.ok) err('failed to send message');
   });
@@ -184,6 +222,32 @@ async function poll() {
   } catch (e) { err(`sync lost: ${e}`); }
 }
 
+// ---------- 사이드바 크기 조절 (기기별 UI 선호 — localStorage, 공유 상태 아님) ----------
+
+function initResizer() {
+  const rz = $('resizer'), conv = $('converse');
+  if (!rz || !conv) return;
+  const saved = Number(localStorage.getItem('ana.converse.width'));
+  if (saved >= 260 && saved <= 560) conv.style.width = `${saved}px`;
+  let drag = null;
+  rz.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, w: conv.offsetWidth };
+    rz.setPointerCapture(e.pointerId);
+    rz.classList.add('active');
+  });
+  rz.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    conv.style.width = `${Math.min(560, Math.max(260, drag.w - (e.clientX - drag.x)))}px`;
+    map && map.invalidateSize();
+  });
+  rz.addEventListener('pointerup', () => {
+    if (!drag) return;
+    drag = null;
+    rz.classList.remove('active');
+    localStorage.setItem('ana.converse.width', conv.offsetWidth);
+  });
+}
+
 // ---------- boot ----------
 
 (async function main() {
@@ -196,5 +260,6 @@ async function poll() {
   markerGroup = L.layerGroup().addTo(map);
   renderAll();
   setupEvents();
+  initResizer();
   setInterval(poll, 2500);
 })();

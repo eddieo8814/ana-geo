@@ -134,6 +134,7 @@ async function searchScenes() {
 // ---------- before / after selection (FR-CD-001, FR-CD-002, FR-CD-003) ----------
 
 function pickScene(featureId, role) {
+  addChip(`scene:${role}:${featureId}`, `🛰 ${role}: ${String(featureId).slice(0, 24)}`, { type: 'scene', role, id: featureId }); // 선택 → 칩 (§24.1)
   const feature = sceneFeatures.find((f) => f.id === featureId);
   if (!feature) return err(`scene ${featureId} is not in the current search result`);
   const scene = GeoStac.sceneFromFeature(feature);
@@ -361,7 +362,7 @@ function renderResult() {
       `<span>${escapeHtml(r.id)}</span>` +
       `<span class="area">${GeoChange.fmtArea(r.areaSqKm)}</span>`;
     row.title = `mean NDVI difference ${r.meanDiff}`;
-    row.addEventListener('click', () => zoomToRegion(r.id));
+    row.addEventListener('click', () => { zoomToRegion(r.id); addChip(`region:${r.id}`, `🌱 ${r.id} (${r.areaSqKm} km²)`, { type: 'region', id: r.id, areaSqKm: r.areaSqKm }); });
     box.appendChild(row);
   }
 }
@@ -550,9 +551,17 @@ function setupEvents() {
 
   $('chatform').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = $('chatinput').value.trim();
+    let text = $('chatinput').value.trim();
     if (!text) return;
     $('chatinput').value = '';
+    if (chips.size) {
+      // 칩을 메시지에 첨부 + state.selection에 병합 저장 (§24.1)
+      const list = [...chips.values()];
+      await writeSelectionChips(list);
+      text += `
+[선택 컨텍스트: ${list.map((c) => c.label).join(', ')}]`;
+      chips.clear(); renderChips();
+    }
     const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
     if (!r.ok) err('failed to send message');
   });
@@ -602,3 +611,62 @@ async function poll() {
   setupEvents();
   setInterval(poll, 2500);
 })();
+
+
+// ---------- 선택 컨텍스트 칩 — frontend 요소 선택 시 등록 (§24.1) ----------
+const chips = new Map(); // key -> { label, ref }
+
+function addChip(key, label, ref) { chips.set(key, { label, ref }); renderChips(); }
+
+function renderChips() {
+  const box = document.getElementById('chips');
+  if (!box) return;
+  box.innerHTML = '';
+  for (const [key, c] of chips) {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    const span = document.createElement('span'); span.textContent = c.label;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+    x.setAttribute('aria-label', `${c.label} 칩 제거`);
+    x.addEventListener('click', () => { chips.delete(key); renderChips(); });
+    el.append(span, x);
+    box.appendChild(el);
+  }
+}
+
+// 칩을 state.selection에 병합 저장 — 기존 selection 필드(activeScene 등)는 보존 (§24.1)
+async function writeSelectionChips(list) {
+  try {
+    const r = await fetch('/api/state');
+    const s = await r.json();
+    const prev = s.selection && typeof s.selection === 'object' ? s.selection : {};
+    s.selection = { ...prev, chips: list.map((c) => c.ref), at: new Date().toISOString() };
+    await fetch('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(s) });
+  } catch { /* 저장 실패해도 메시지 첨부는 진행 */ }
+}
+
+// ---------- 사이드바 크기 조절 (기기별 UI 선호 — localStorage) ----------
+function initResizer() {
+  const rz = document.getElementById('resizer'), conv = document.getElementById('converse');
+  if (!rz || !conv) return;
+  const saved = Number(localStorage.getItem('ana.converse.width'));
+  if (saved >= 260 && saved <= 560) conv.style.width = `${saved}px`;
+  let drag = null;
+  rz.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, w: conv.offsetWidth };
+    rz.setPointerCapture(e.pointerId);
+    rz.classList.add('active');
+  });
+  rz.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    conv.style.width = `${Math.min(560, Math.max(260, drag.w - (e.clientX - drag.x)))}px`;
+    if (typeof map !== 'undefined' && map && map.invalidateSize) map.invalidateSize();
+  });
+  rz.addEventListener('pointerup', () => {
+    if (!drag) return;
+    drag = null;
+    rz.classList.remove('active');
+    localStorage.setItem('ana.converse.width', conv.offsetWidth);
+  });
+}
+initResizer();
