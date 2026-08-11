@@ -637,15 +637,13 @@ function renderChips() {
   }
 }
 
-// 칩을 state.selection에 병합 저장 — 기존 selection 필드(activeScene 등)는 보존 (§24.1)
-async function writeSelectionChips(list) {
-  try {
-    const r = await fetch('/api/state');
-    const s = await r.json();
+// 칩을 state.selection에 병합 저장 — selectScene/selectRegion이 쓰는 기존 필드(kind, id 등)는 보존 (§24.1).
+// 독립 GET/PUT은 saveState 큐에 밀려 있는 쓰기를 덮으므로 반드시 saveState를 통한다 (§8.2-1).
+function writeSelectionChips(list) {
+  return saveState((s) => {
     const prev = s.selection && typeof s.selection === 'object' ? s.selection : {};
     s.selection = { ...prev, chips: list.map((c) => c.ref), at: new Date().toISOString() };
-    await fetch('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(s) });
-  } catch { /* 저장 실패해도 메시지 첨부는 진행 */ }
+  });
 }
 
 // ---------- 사이드바 크기 조절 (기기별 UI 선호 — localStorage) ----------
