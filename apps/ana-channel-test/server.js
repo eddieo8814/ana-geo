@@ -70,21 +70,58 @@ function serveStatic(res, urlPath) {
 }
 const exec = (cmd, args) => new Promise((r) => execFile(cmd, args, { timeout: 3000 }, (e, out) => r(e ? '' : out.trim())));
 
-// ---------- 진단: fakechat(:8787) 상태 + 고아 판별 ----------
+// ---------- 진단: fakechat(:8787) 상태 + 고아 판별 + MCP 기동 로그 ----------
 async function fakechatStatus() {
   let listening = false;
   try {
     const r = await fetch(`http://127.0.0.1:${FAKECHAT_PORT}/`, { signal: AbortSignal.timeout(800) });
     listening = r.status < 500;
   } catch { }
-  let orphan = null, pid = null, ppid = null;
+  let orphan = null, pid = null, ppid = null, parentCmd = null;
   const pids = (await exec('lsof', ['-ti', `:${FAKECHAT_PORT}`, '-sTCP:LISTEN'])).split('\n').filter(Boolean);
   if (pids.length) {
     pid = pids[0];
     ppid = (await exec('ps', ['-o', 'ppid=', '-p', pid])).trim();
-    orphan = ppid === '1'; // 부모가 launchd = 이전 세션이 남긴 고아
+    orphan = ppid === '1'; // 부모가 launchd = 이전 세션이 남긴 고아 → 살아있는 세션의 MCP는 failed 상태
+    if (!orphan && ppid) parentCmd = (await exec('ps', ['-o', 'comm=', '-p', ppid])).trim();
   }
-  return { listening, pid, ppid, orphan };
+  return { listening, pid, ppid, orphan, parentCmd, mcp: await latestMcpLog() };
+}
+
+/* /mcp가 보여주는 것을 페이지에서 재구성: 가장 최근 fakechat MCP 기동 로그를 읽는다.
+ * 로그 위치: ~/Library/Caches/claude-cli-nodejs/<프로젝트 슬러그>/mcp-logs-plugin-fakechat-fakechat/*.jsonl
+ * 마지막 기동 시도에 error 항목이 있으면 세션의 /mcp에는 failed로 보인다. */
+async function latestMcpLog() {
+  try {
+    const os = require('node:os');
+    const base = path.join(os.homedir(), 'Library', 'Caches', 'claude-cli-nodejs');
+    let newest = null;
+    for (const proj of fs.readdirSync(base)) {
+      const dir = path.join(base, proj, 'mcp-logs-plugin-fakechat-fakechat');
+      if (!fs.existsSync(dir)) continue;
+      for (const f of fs.readdirSync(dir)) {
+        if (!f.endsWith('.jsonl')) continue;
+        const full = path.join(dir, f);
+        const m = fs.statSync(full).mtimeMs;
+        if (!newest || m > newest.mtime) newest = { full, mtime: m, project: proj.replace(/^.*-apps-/, '') };
+      }
+    }
+    if (!newest) return null;
+    const lines = fs.readFileSync(newest.full, 'utf8').trim().split('\n')
+      .map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    // 주의: 플러그인의 stderr 기동 배너도 error 항목으로 로깅되므로,
+    // 실제 실패 마커(EADDRINUSE / Connection failed / Failed to start)만 실패로 분류한다.
+    const isFailure = (e) => /EADDRINUSE|Connection failed|Failed to start|-32000/.test(String(e));
+    const lastFail = [...lines].reverse().find((l) => l.error && isFailure(l.error));
+    let reason = null;
+    if (lastFail) {
+      const e = String(lastFail.error);
+      reason = /EADDRINUSE/.test(e) ? `EADDRINUSE — :${FAKECHAT_PORT} 이미 사용 중(고아 의심)`
+        : /-32000/.test(e) ? 'Connection closed (-32000)'
+        : e.slice(0, 140);
+    }
+    return { project: newest.project, at: new Date(newest.mtime).toISOString(), failed: !!lastFail, reason };
+  } catch { return null; }
 }
 
 // ---------- server ----------

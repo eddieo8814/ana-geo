@@ -28,10 +28,20 @@ async function health() {
   else setLight('L2', 'bad', '롱폴 없음 — node fakechat-bridge.js 실행 필요');
 
   const fc = h.fakechat;
-  if (fc.listening && fc.orphan === false) setLight('L3', 'ok', `리스닝 중 (pid ${fc.pid}, 세션 자식)`);
-  else if (fc.listening && fc.orphan === true) setLight('L3', 'warn', `고아 의심 pid ${fc.pid} (부모 launchd) — 핑이 성공하면 유지, 실패하면 kill 후 ./brain.sh`);
-  else if (fc.listening) setLight('L3', 'ok', '리스닝 중');
-  else setLight('L3', 'bad', '없음 — ./brain.sh 로 세션을 채널과 함께 기동');
+  const mcp = fc.mcp;
+  const mcpTime = mcp ? new Date(mcp.at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+  const mcpNote = !mcp ? ''
+    : mcp.failed ? ` · MCP 기동 실패(${mcp.project}, ${mcpTime}): ${mcp.reason} — 세션 /mcp에 failed로 보이는 상태`
+    : ` · MCP 마지막 기동 정상(${mcp.project}, ${mcpTime})`;
+  if (fc.listening && fc.orphan === false) {
+    setLight('L3', mcp && mcp.failed ? 'warn' : 'ok', `리스닝 중 (pid ${fc.pid}, 부모 ${fc.parentCmd || '세션'})${mcpNote}`);
+  } else if (fc.listening && fc.orphan === true) {
+    setLight('L3', 'warn', `고아 의심 pid ${fc.pid} (부모 launchd)${mcpNote} — 핑 실패 시 kill 후 ./brain.sh`);
+  } else if (fc.listening) {
+    setLight('L3', 'ok', `리스닝 중${mcpNote}`);
+  } else {
+    setLight('L3', 'bad', `없음 — ./brain.sh 로 세션을 채널과 함께 기동${mcpNote}`);
+  }
 
   if (h.brain.lastAgentAgoMs === null) setLight('L4', 'warn', '이 서버로 응답이 온 적 없음 — 핑 테스트로 확인');
   else if (h.brain.lastAgentAgoMs < 5 * 60 * 1000) setLight('L4', 'ok', `최근 응답 ${Math.round(h.brain.lastAgentAgoMs / 1000)}s 전`);

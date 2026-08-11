@@ -114,7 +114,8 @@
       <li><b>주황(고아 의심)</b>: 이전 세션이 남긴 bun 서버가 8787을 점유했을 수 있다. 새 세션의 fakechat은 <code>EADDRINUSE</code>로 조용히 죽는다(<code>/mcp</code>에 <code>-32000</code>). 핑이 성공하면 사용 중인 것이니 유지하고, 실패하면:
         <pre>lsof -iTCP:8787 -sTCP:LISTEN -n -P   # 부모(PPID)가 1(launchd)이면 고아
 kill &lt;PID&gt;                            # 고아 제거 후 세션 재시작 (또는 처음부터 ./brain.sh 사용)</pre></li>
-      <li><b>빨강(리스너 없음)</b>: 세션이 <code>--channels</code> 없이 떴거나 fakechat 기동 실패. 세션에서 <code>/mcp</code>로 상태 확인 → 실패면 세션 종료 후 <code>./brain.sh</code>로 재기동.</li>
+      <li><b>빨강(리스너 없음)</b>: 세션이 <code>--channels</code> 없이 떴거나 fakechat 기동 실패. 세션 종료 후 <code>./brain.sh</code>로 재기동.</li>
+      <li><b>세션의 <code>/mcp</code> failed 여부는 이 신호등이 직접 보여준다</b> — 서버가 fakechat MCP 기동 로그(<code>~/Library/Caches/claude-cli-nodejs/…/mcp-logs-plugin-fakechat-fakechat/</code>)를 읽어, 마지막 기동이 실패(EADDRINUSE·-32000)면 "MCP 기동 실패: …" 문구와 어느 앱 세션인지 표시한다. 세션에 들어가 <code>/mcp</code>를 칠 필요가 없다.</li>
       <li>MCP 로그 직접 확인:
         <pre>ls -t ~/Library/Caches/claude-cli-nodejs/*/mcp-logs-plugin-fakechat-fakechat/*.jsonl | head -1 | xargs tail -5</pre></li>
     </ul>
