@@ -1,5 +1,7 @@
 # ANA Geo
 
+**English** · [한국어](README.ko.md)
+
 **Agent-Native GIS** — a family of self-hosted map applications you operate by **watching and talking**, built on [ANA (Agent-Native Agent)](https://github.com/tykimos/agent-native-agent).
 
 The agent is not a chatbot bolted onto a GIS. It lives **inside the runtime**: it reads the map state, runs the analysis, and — when you ask for something the app can't do — **proposes a code change and evolves the app while you're using it**.
