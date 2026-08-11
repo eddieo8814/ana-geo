@@ -3,7 +3,7 @@
     "name": "ana-geo-search",
     "version": "0.1.0"
   },
-  "stateVersion": 1,
+  "stateVersion": 13,
   "map": {
     "view": {
       "center": [
@@ -12,12 +12,112 @@
       ],
       "zoom": 13
     },
-    "observedView": null,
+    "observedView": {
+      "center": [
+        36.35040000000001,
+        127.38450000000002
+      ],
+      "zoom": 19
+    },
     "baseLayer": "osm"
   },
   "markers": [],
-  "layers": [],
+  "layers": [
+    {
+      "visible": true,
+      "resultVersion": 1,
+      "id": "features-upload_cafes",
+      "type": "geojson",
+      "label": "cafes.geojson",
+      "key": "upload_cafes",
+      "role": "features",
+      "source": "user-upload",
+      "featureCount": 3,
+      "resultRef": "/api/results/features-upload_cafes",
+      "bbox": [
+        127.39008301659838,
+        36.35039675367739,
+        127.41241508224695,
+        36.35039987014709
+      ]
+    },
+    {
+      "visible": true,
+      "resultVersion": 1,
+      "id": "features-upload_unis",
+      "type": "geojson",
+      "label": "unis.geojson",
+      "key": "upload_unis",
+      "role": "features",
+      "source": "user-upload",
+      "featureCount": 1,
+      "resultRef": "/api/results/features-upload_unis",
+      "bbox": [
+        127.3845,
+        36.3504,
+        127.3845,
+        36.3504
+      ]
+    },
+    {
+      "visible": true,
+      "resultVersion": 2,
+      "id": "search-results",
+      "type": "geojson",
+      "label": "Search results",
+      "key": "search-results",
+      "role": "result",
+      "category": "upload_cafes",
+      "source": "analysis",
+      "featureCount": 3,
+      "resultRef": "/api/results/search-results",
+      "bbox": [
+        127.39008301659838,
+        36.35039675367739,
+        127.41241508224695,
+        36.35039987014709
+      ],
+      "truncated": false,
+      "summary": "upload_cafes: within 3 km of upload_unis",
+      "explain": [
+        {
+          "label": "within 3 km of upload_unis",
+          "matchCount": 3,
+          "referenceCount": 1
+        }
+      ]
+    },
+    {
+      "visible": true,
+      "resultVersion": 2,
+      "id": "search-buffers",
+      "type": "geojson",
+      "label": "Condition buffers",
+      "key": "search-buffers",
+      "role": "buffer",
+      "source": "analysis",
+      "featureCount": 1,
+      "resultRef": "/api/results/search-buffers",
+      "bbox": [
+        127.35100190171339,
+        36.32342038908826,
+        127.4179980982866,
+        36.37737961091174
+      ]
+    }
+  ],
   "selection": null,
-  "analysis": null,
+  "analysis": {
+    "target": "upload_cafes",
+    "operator": "AND",
+    "conditions": [
+      {
+        "relation": "within_distance",
+        "reference": "upload_unis",
+        "distance": 3,
+        "unit": "km"
+      }
+    ]
+  },
   "provenance": []
 }

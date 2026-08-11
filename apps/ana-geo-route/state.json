@@ -3,7 +3,7 @@
     "name": "ana-geo-route",
     "version": "0.1.0"
   },
-  "stateVersion": 5,
+  "stateVersion": 1,
   "map": {
     "view": {
       "center": [
@@ -12,13 +12,7 @@
       ],
       "zoom": 14
     },
-    "observedView": {
-      "center": [
-        36.350388748220006,
-        127.38445758819581
-      ],
-      "zoom": 14
-    },
+    "observedView": null,
     "baseLayer": "osm"
   },
   "markers": [],
@@ -27,14 +21,8 @@
   "analysis": {
     "mode": "drive",
     "optimize": "time",
-    "origin": {
-      "lat": 36.3503844269343,
-      "lng": 127.38450050354005
-    },
-    "destination": {
-      "lat": 36.3503844269343,
-      "lng": 127.38450050354005
-    },
+    "origin": null,
+    "destination": null,
     "areaCapKm2": 100,
     "paddingKm": 2,
     "isochroneMinutes": [
@@ -45,30 +33,7 @@
     "candidateCategory": "hospital",
     "candidateRadiusKm": 2.5,
     "route": null,
-    "ranking": {
-      "rankedBy": "time",
-      "candidatesConsidered": 2,
-      "candidatesAvailable": 2,
-      "truncated": false,
-      "unreachable": 0,
-      "top": [
-        {
-          "rank": 1,
-          "id": "node/111",
-          "name": "테스트 병원",
-          "distanceMeters": 318,
-          "travelTimeSeconds": 240
-        },
-        {
-          "rank": 2,
-          "id": "node/222",
-          "name": null,
-          "distanceMeters": 800,
-          "travelTimeSeconds": 600
-        }
-      ],
-      "computedAt": "2026-08-11T01:03:57.869Z"
-    },
+    "ranking": null,
     "isochrone": null,
     "network": null,
     "lastError": null
