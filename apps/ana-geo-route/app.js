@@ -511,7 +511,7 @@ function fitTo(layerId) {
 
 function renderFeedItem(item) {
   const div = document.createElement('div');
-  div.className = `msg ${item.role}`;
+  div.className = item.kind === 'activity' ? 'msg activity' : `msg ${item.role}`;
   div.textContent = item.text || '';
   $('feed').appendChild(div);
   $('feed').scrollTop = $('feed').scrollHeight;

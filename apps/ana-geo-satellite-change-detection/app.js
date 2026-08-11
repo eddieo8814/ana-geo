@@ -25,6 +25,29 @@ const $ = (id) => document.getElementById(id);
 const err = (m) => { $('err').textContent = m || ''; $('err').className = ''; };        // §25
 const warn = (m) => { $('err').textContent = m || ''; $('err').className = m ? 'warn' : ''; };
 
+// ---------- 선택 컨텍스트 칩 — frontend 요소 선택 시 등록 (§24.1) ----------
+// 장면(before/after)이나 변화 영역을 고르면 칩으로 쌓이고, 전송 시 메시지에
+// [선택 컨텍스트]로 첨부되며 state.selection에도 구조화되어 저장돼
+// ANA가 정확한 대상을 읽을 수 있다.
+const chips = new Map(); // key -> { label, ref }
+
+function addChip(key, label, ref) { chips.set(key, { label, ref }); renderChips(); }
+
+function renderChips() {
+  const box = $('chips');
+  box.innerHTML = '';
+  for (const [key, c] of chips) {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    const span = document.createElement('span'); span.textContent = c.label;
+    const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+    x.setAttribute('aria-label', `${c.label} 칩 제거`);
+    x.addEventListener('click', () => { chips.delete(key); renderChips(); });
+    el.append(span, x);
+    box.appendChild(el);
+  }
+}
+
 // ---------- state I/O ----------
 
 async function fetchState() {
@@ -571,7 +594,7 @@ function setupEvents() {
 
 function renderFeedItem(item) {
   const div = document.createElement('div');
-  div.className = `msg ${item.role}`;
+  div.className = item.kind === 'activity' ? 'msg activity' : `msg ${item.role}`;
   div.textContent = item.text || '';
   $('feed').appendChild(div);
   $('feed').scrollTop = $('feed').scrollHeight;

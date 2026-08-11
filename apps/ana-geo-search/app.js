@@ -446,7 +446,10 @@ function setupEvents() {
   $('q-target').addEventListener('change', () => patchAnalysis({ target: $('q-target').value }));
   $('q-operator').addEventListener('change', () => patchAnalysis({ operator: $('q-operator').value }));
   $('add-cond').addEventListener('click', () => conditionsRequest('POST', null, {
-    relation: 'within_distance', reference: acquiredKeys().find((k) => k !== state.analysis.target) || 'university',
+    // 시드 상태의 analysis 는 null 이다 — 획득한 레이어가 있으면 find 의 콜백이
+    // 실제로 실행되므로 target 을 무방비로 읽으면 여기서 터진다.
+    relation: 'within_distance',
+    reference: acquiredKeys().find((k) => k !== (state.analysis && state.analysis.target)) || 'university',
     distance: 1000, unit: 'm',
   }));
   $('run').addEventListener('click', runSearch);
@@ -525,7 +528,7 @@ function initResizer() {
 
 function renderFeedItem(item) {
   const div = document.createElement('div');
-  div.className = `msg ${item.role}`;
+  div.className = item.kind === 'activity' ? 'msg activity' : `msg ${item.role}`;
   div.textContent = item.text || '';
   $('feed').appendChild(div);
   $('feed').scrollTop = $('feed').scrollHeight;
