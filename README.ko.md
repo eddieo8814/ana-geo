@@ -237,6 +237,48 @@ flowchart TB
 
 ---
 
+## 지오 스택 상세
+
+아래 라이브러리는 전부 **앱에 벤더링**(브라우저)되거나 앱별 `requirements.txt`에 고정(Python)됩니다 — CDN도 API 키도 없습니다(*Own Your Harness*).
+
+### 🗺 Leaflet `1.9.4` — 지도 엔진
+
+경량 웹 지도 라이브러리의 사실상 표준(~42 KB gzip). 타일 베이스맵과 벡터 오버레이를 작고 안정적인 API로 렌더링합니다. 사용 기능: 타일 레이어(OSM 래스터), 마커, 피처별 스타일·클릭 이벤트를 갖는 `L.geoJSON`, `fitBounds`, `L.imageOverlay`(위성 썸네일). Mapbox GL/구글맵 대신 택한 이유는 **계정·토큰·빌드 단계가 전혀 필요 없고**(앱마다 JS+CSS 한 쌍 벤더링으로 끝), OpenLayers 대신 택한 이유는 코딩 에이전트가 안전하게 수정할 수 있는 API 단순성입니다. 실측 메모: 기본 SVG 렌더러에서는 레이어당 ~2,000 피처(PRD §26.1)를 넘기기 전에 캔버스/클러스터링으로 전환해야 합니다.
+
+### 🌍 OpenStreetMap — 세계의 오픈 지리 데이터베이스
+
+도로·건물·POI·토지이용을 담은 크라우드소싱 지리 데이터(ODbL 라이선스). ANA Geo는 세 경로로 소비합니다: **래스터 타일**(베이스맵 — 브라우저 직접 요청을 허용하는 유일한 외부 호출), **Overpass 질의**(POI·도로·토지이용), **OSMnx 그래프 다운로드**(도로망). 대전 실측 메모: OSM 커버리지는 고르지 않습니다 — `landuse=residential` 폴리곤이 측정한 도심 bbox의 ~10%만 덮어서, OSM 유래 주거지 거리를 pass/fail 제약의 단독 근거로 쓰면 안 됩니다(site 앱 주의사항).
+
+### 🔍 Overpass API — OSM 질의 엔진
+
+OSM 데이터 전용 읽기 질의 서비스로, 자체 언어 **Overpass QL**을 씁니다: 요소 필터(`node["amenity"="cafe"](bbox)`)를 기술하면 일치 요소를 OSM JSON으로 돌려줍니다. 우리는 항상 앱 `server.js`의 allowlist 프록시를 경유하고, 여러 카테고리를 **한** 요청으로 병합하며, 모든 질의를 bbox와 요소 캡으로 한정합니다. 실전에서 배운 것들: 공용 인스턴스는 클라이언트당 ~2 동시 슬롯이고 한도를 넘으면 **HTTP 200 + HTML 오류 본문**으로 답하거나(성공 판정은 상태 코드가 아니라 파싱으로) 부하 시 504/502를 냅니다; 태그 선택이 결정적입니다(대전에서 `highway=bus_stop` 2,554건 vs `amenity=bus_station` 7건); 응답은 GeoJSON이 아니라 OSM JSON이라 각 앱이 §11.1 형태(`name / category / source:"osm" / sourceId / fetchedAt`)로 만드는 소형 정규화기를 동봉합니다.
+
+### 📐 Turf.js `7` — 브라우저 공간 분석
+
+브라우저에서 GeoJSON을 직접 다루는 모듈형 공간 분석 라이브러리. 의존 모듈: `distance`(하버사인), `buffer`(m/km), `booleanPointInPolygon`, `nearestPoint`, `pointToLineDistance`, `pointToPolygonDistance` — 마지막 것은 **Turf ≥ 7.3 필수**라 버전 하한이 중요합니다(site 앱의 후보-경계 거리 계산). 실측 메모: `buffer`는 평면 근사(도시 스케일 무방, 대형·고위도에서 왜곡)이고, 면적 계산은 절대 위경도 도 단위로 하지 않습니다 — 재투영하거나 측지 헬퍼를 씁니다.
+
+### 🛣 OSMnx `2` + NetworkX + GeoPandas — 도로망을 그래프로 (Python)
+
+**OSMnx**는 bbox/지명의 도로망을 OSM에서(내부적으로 Overpass 경유) 내려받아 실제 도로 기하를 갖는 **NetworkX** 유향 그래프로 만듭니다. `add_edge_speeds`/`add_edge_travel_times`는 `maxspeed` 태그에서 속도를 추정하고 누락 구간은 도로 등급별 평균으로 채웁니다(그래서 소요 시간은 추정치이며, 그렇게 표기합니다). **NetworkX**가 알고리즘을 맡습니다: 라우팅은 Dijkstra 최단 경로, 등시선은 travel-time 반경의 `ego_graph` + 헐 근사(*approximate* 명기). **GeoPandas**는 OSMnx의 기하 처리를 받칩니다. 실측 메모: 도시 규모 `graph_from_bbox`는 수십 초·수백 MB가 될 수 있어 분석 면적 ~100 km² 상한, bbox 2 km 패딩, `(bbox, network_type)` 그래프 캐시를 두며, 진짜 병목은 공용 Overpass 엔드포인트입니다(한 측정 세션에서 8회 중 5회 실패).
+
+### 🛰 STAC + Earth Search — 위성 영상 찾기
+
+**STAC**(SpatioTemporal Asset Catalog)은 지리공간 자산을 기술하는 JSON 명세입니다 — 모든 장면은 footprint 기하·시각·속성(`eo:cloud_cover` 등)·*에셋*(밴드 파일, 썸네일)을 가진 *Item*이고, 검색은 bbox + 날짜 범위 + 속성 필터의 `POST /search` 한 번입니다. 기본 공급자로 **Earth Search v1**(`earth-search.aws.element84.com`, Element 84 운영)을 고정한 이유는 **검색과 에셋 다운로드가 모두 무키**인 드문 카탈로그이기 때문입니다. 일부 에셋 링크는 requester-pays `s3://`라서 항상 공개 `https://` href를 씁니다. 실측 메모: `thumbnail` 에셋은 있지만 `overview` 에셋은 존재하지 않으며, 썸네일은 장면 전체 축소판(110 km 타일에 ~343 px ≈ 픽셀당 320 m)이라 장면 수준 맥락 전용입니다.
+
+### 🌱 Sentinel-2 L2A — 영상 그 자체
+
+ESA의 광학 지구관측 위성군: 우리가 쓰는 밴드는 10 m 해상도, ~5일 재방문, 무료·공개. **L2A**는 대기 보정된 지표 반사율(BOA)로, 지수 계산에 맞는 처리 수준입니다. NDVI는 `red`(B04)와 `nir`(B08), 둘 다 10 m. 우리가 처리하는 함정 두 가지: 장면은 **MGRS 타일**로 잘려 있어 동일 타일 쌍은 픽셀 그리드를 공유하지만 타일이 다르면 재투영이 필요하고(v1은 명시적으로 거부), processing baseline ≥ 4.0은 **BOA 오프셋**(−1000)을 더해 두므로 STAC 메타데이터가 미조화라고 말할 때 되돌려야 합니다.
+
+### 🧮 rasterio + NumPy — 세상을 통째로 안 받는 래스터 연산
+
+**rasterio**(GDAL의 Python 바인딩)가 Sentinel-2 **COG**(Cloud-Optimized GeoTIFF — 내부 타일링 덕에 HTTP `Range` 요청으로 원하는 윈도우만 받을 수 있는 GeoTIFF)를 읽습니다. `/vsicurl/`로 각 밴드의 AOI 윈도우만 읽으므로 ~700 MB 장면 대신 수 KB~수 MB면 됩니다 — §8.4 프록시가 `Range` 헤더를 무변경 전달해야 하는 이유가 이것입니다. **NumPy**가 배열 연산(NDVI, 차분, 임계)을 맡고, `rasterio.features.shapes`가 변화 마스크를 폴리곤화합니다. 철칙: 면적은 타일의 UTM 좌표계(미터)에서 계산하고 위경도에서는 절대 하지 않습니다.
+
+### 📄 GeoJSON — 공용어
+
+RFC 7946. ANA Geo의 모든 벡터 결과 — 마커·POI·버퍼·경로·footprint·변화 폴리곤 — 는 GeoJSON `FeatureCollection`으로 정규화되어 어느 레이어든 어느 앱으로든, 그리고 곧바로 Leaflet 위로 흐릅니다. PRD에도 명시된 영원한 함정 하나: GeoJSON 좌표는 **`[lon, lat]`**, Leaflet API는 **`[lat, lon]`** — 변환은 렌더 경계에서만 합니다.
+
+---
+
 ## 공유 계약 (PRD §8)
 
 독립된 7개 앱을 하나의 시스템으로 느끼게 하는 것:

@@ -237,6 +237,48 @@ Scene acquisition is the app's **own** STAC search (per the independence rule �
 
 ---
 
+## The geo stack in detail
+
+Every library below is either **vendored into the app** (browser) or pinned in a per-app `requirements.txt` (Python) — no CDNs, no API keys, per the *Own Your Harness* principle.
+
+### 🗺 Leaflet `1.9.4` — the map engine
+
+The de-facto standard lightweight web-mapping library (~42 KB gzipped). Renders tiled basemaps and vector overlays with a tiny, stable API. We use: tile layers (OSM raster), markers, `L.geoJSON` layers with per-feature styling and click events, `fitBounds`, and `L.imageOverlay` (satellite thumbnails). Chosen over Mapbox GL/Google Maps because it needs **no account, no token, no build step** — one vendored JS+CSS pair per app — and over OpenLayers for API simplicity a coding agent can safely edit. Field note: with the default SVG renderer, keep feature counts ≤ ~2,000 per layer (PRD §26.1) before switching to canvas or clustering.
+
+### 🌍 OpenStreetMap — the world's open geodatabase
+
+Crowd-sourced geographic data covering roads, buildings, POIs, and land use, under the ODbL license. ANA Geo consumes it three ways: **raster tiles** (basemap, the one browser-direct external request we allow), **Overpass queries** (POIs, roads, land use), and **OSMnx graph downloads** (road networks). Field note from Daejeon: OSM coverage is uneven — `landuse=residential` polygons covered only ~10 % of the urban bbox we measured, so OSM-derived residential distance must never be the sole basis of a pass/fail constraint (PRD site-app caveat).
+
+### 🔍 Overpass API — the OSM query engine
+
+A read-only query service over OSM data with its own language, **Overpass QL**: you describe element filters (`node["amenity"="cafe"](bbox)`) and it returns matching elements as OSM JSON. We always go through the app's `server.js` allowlist proxy, merge multiple categories into **one** request, and bound every query by bbox with an element cap. Hard-won field notes: public instances run ~2 concurrent slots per client and will answer an over-limit client with **HTTP 200 + an HTML error page** (so success must be judged by parsing, never by status code), or with 504/502 under load; tag choice matters enormously (`highway=bus_stop` returned 2,554 stops in Daejeon where `amenity=bus_station` returned 7); and responses are OSM JSON, not GeoJSON — each app ships a small normalizer that emits §11.1-shaped features (`name / category / source: "osm" / sourceId / fetchedAt`).
+
+### 📐 Turf.js `7` — browser-side spatial analysis
+
+A modular geospatial analysis library that operates directly on GeoJSON in the browser. Modules we rely on: `distance` (haversine), `buffer` (m/km), `booleanPointInPolygon`, `nearestPoint`, `pointToLineDistance`, and `pointToPolygonDistance` — the last one **requires Turf ≥ 7.3**, which is why the version floor matters (site app computes candidate-to-boundary distances). Field notes: `buffer` is a planar approximation (fine at city scale, distorted for large/high-latitude buffers), and area math must never be done in lon/lat degrees — reproject or use geodesic helpers.
+
+### 🛣 OSMnx `2` + NetworkX + GeoPandas — road networks as graphs (Python)
+
+**OSMnx** downloads a road network for a bbox/place from OSM (internally via Overpass) and builds a **NetworkX** directed graph with real edge geometry; `add_edge_speeds`/`add_edge_travel_times` impute speeds from `maxspeed` tags with per-highway-class fallbacks (so travel times are estimates, and we label them as such). **NetworkX** supplies the algorithms: Dijkstra shortest paths for routing, `ego_graph` with a travel-time radius for isochrones (hull-approximated, labeled *approximate*). **GeoPandas** underpins OSMnx's geometry handling. Field notes: a city-scale `graph_from_bbox` can take tens of seconds and hundreds of MB — we cap analysis areas at ~100 km², pad bboxes by 2 km, cache graphs by `(bbox, network_type)`, and treat the public Overpass endpoint (5 failures in 8 attempts during one measurement session) as the real bottleneck.
+
+### 🛰 STAC + Earth Search — finding satellite imagery
+
+**STAC** (SpatioTemporal Asset Catalog) is a JSON specification for describing geospatial assets — every scene is an *Item* with a footprint geometry, timestamp, properties (e.g. `eo:cloud_cover`), and *assets* (band files, thumbnails). Searching is one `POST /search` with bbox + datetime range + property filters. We pin **Earth Search v1** (`earth-search.aws.element84.com`, by Element 84) as the default provider because it is the rare catalog where **both search and asset download are keyless**; note that some asset links are requester-pays `s3://` URLs — always use the public `https://` hrefs. Field note: the `thumbnail` asset exists, a hypothetical `overview` asset does not; thumbnails are whole-scene previews (~343 px for a 110 km tile ≈ 320 m/pixel) — scene-level context only.
+
+### 🌱 Sentinel-2 L2A — the imagery itself
+
+ESA's optical Earth-observation constellation: 10 m resolution in the bands we use, ~5-day revisit, free and open. **L2A** means atmospherically corrected surface reflectance (BOA) — the right level for index math. NDVI uses `red` (B04) and `nir` (B08), both 10 m. Two traps we handle: scenes are cut into **MGRS tiles** (same-tile pairs share a pixel grid — cross-tile pairs need reprojection, which v1 refuses explicitly), and processing baseline ≥ 4.0 adds a **BOA offset** (−1000) that must be un-applied when the STAC metadata says it hasn't been harmonized.
+
+### 🧮 rasterio + NumPy — raster math without downloading the world
+
+**rasterio** (Python bindings over GDAL) reads the Sentinel-2 **COGs** (Cloud-Optimized GeoTIFFs — GeoTIFFs whose internal tiling lets a client fetch just a window via HTTP `Range` requests). With `/vsicurl/` we read only the AOI window of each band — kilobytes to a few MB instead of a ~700 MB scene — which is also why the §8.4 proxy must forward `Range` headers untouched. **NumPy** does the array math (NDVI, differencing, thresholding), and `rasterio.features.shapes` polygonizes the change mask. Field rule: areas are computed in the tile's UTM CRS (meters), never in lon/lat.
+
+### 📄 GeoJSON — the lingua franca
+
+RFC 7946. Every vector result in ANA Geo — markers, POIs, buffers, routes, footprints, change polygons — normalizes to a GeoJSON `FeatureCollection` so any layer can flow into any app and straight onto Leaflet. One eternal trap, documented in the PRD itself: GeoJSON coordinates are **`[lon, lat]`** while Leaflet APIs take **`[lat, lon]`** — conversions live at the render boundary only.
+
+---
+
 ## Shared contracts (PRD §8)
 
 What makes seven independent apps feel like one system:
